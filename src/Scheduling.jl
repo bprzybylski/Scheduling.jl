@@ -1,5 +1,5 @@
 module Scheduling
 
-greet() = print("Hello World!")
+include("types/Job.jl")
 
 end # module
