@@ -8,7 +8,6 @@ end
 
 function save(S::Schedule, file::String; compile = false)
     file_path = abspath(file)
-    current_dir = pwd()
     build_dir = dirname(file_path)
 
     open(file_path, "w") do f
@@ -30,32 +29,32 @@ function save(S::Schedule, file::String; compile = false)
                                                inner sep=0pt}}
                 """)
 
-                # Find the number of machines
-                m       = Int(maximum(A->A.M, S.assignments))
-                # Find the length of a schedule
-                cmax    = float(maximum(A->A.C, S.assignments))
+        # Find the number of machines
+        m       = Int(maximum(A->A.M, S.assignments))
+        # Find the length of a schedule
+        cmax    = float(maximum(A->A.C, S.assignments))
 
-                write(f, """% Draw the horizontal axis
-                        \\draw (0,$m) -- ($cmax,$m);
-                        % Mark integers on this axis
-                        \\foreach \\i in {0,1,2,...,$(Int(ceil(cmax)))}
-                            \\draw (\\i, $m.3) node[below] {\\i}--++(0,-.3);
-                        """)
+        write(f, """% Draw the horizontal axis
+                \\draw (0,$m) -- ($cmax,$m);
+                % Mark integers on this axis
+                \\foreach \\i in {0,1,2,...,$(Int(ceil(cmax)))}
+                    \\draw (\\i, $m.3) node[below] {\\i}--++(0,-.3);
+                """)
 
-                write(f, "% Processors", "\n")
-                for i in 1:m
-                    write(f, "\\fill[gray!15] (0,$(i - 1)) rectangle ($cmax, $i);", "\t")
-                    write(f, "\\node[left,xshift=-0.25cm] at (0,0.5+$(i - 1)) {\$M_$i\$};", " % M$i", "\n")
-                end
+        write(f, "% Processors", "\n")
+        for i in 1:m
+            write(f, "\\fill[gray!15] (0,$(i - 1)) rectangle ($cmax, $i);", "\t")
+            write(f, "\\node[left,xshift=-0.25cm] at (0,0.5+$(i - 1)) {\$M_$i\$};", " % M$i", "\n")
+        end
 
-                write(f, "% Jobs", "\n")
-                for A in S.assignments
-                    write(f, "\\path ($(float(A.S)),$(A.M)) node[burst={\$$(A.J.name)\$}{$(float(A.C-A.S))}, fill=white];", " % $A", "\n")
-                end
+        write(f, "% Jobs", "\n")
+        for A in S.assignments
+            write(f, "\\path ($(float(A.S)),$(A.M)) node[burst={\$$(A.J.name)\$}{$(float(A.C-A.S))}, fill=white];", " % $A", "\n")
+        end
 
-                write(f, """\\end{tikzpicture}
-                        \\end{document}
-                        """)
+        write(f, """\\end{tikzpicture}
+                \\end{document}
+                """)
 
         # External LaTeX compilation
         if compile
