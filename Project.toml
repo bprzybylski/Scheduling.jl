@@ -1,0 +1,4 @@
+name = "Scheduling"
+uuid = "3046eef8-5348-48c9-b840-6c15f76662f3"
+authors = ["Bartek Przybylski <bap@amu.edu.pl>"]
+version = "0.1.0"
