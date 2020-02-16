@@ -7,6 +7,9 @@ mutable struct JobAssignment
         if S >= C
             error("The execution time must be positive.")
         end
+        if M == 0
+            error("The machine number must be positive.")
+        end
         return new(J, M, S, C)
     end
 end
