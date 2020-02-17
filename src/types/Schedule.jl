@@ -1,3 +1,6 @@
+using Plots
+using Plots.PlotMeasures
+
 mutable struct Schedule
     jobs::Jobs
     machines::Machines
@@ -8,7 +11,7 @@ mutable struct Schedule
 end
 
 """
-    save(S::Schedule, output_file::String; compile = false)
+    save(S::Schedule, output_file::String = "Schedule.tex"; compile = false)
 
 Generates a TeX file with a tikz representation of a schedule. An optional parameter `compile` determines whether the output file should be automatically compiled using `pdflatex`. If the `output_file` exists, then it will be replaced without any prompt. All the intermediate directories will be created if needed.
 
@@ -18,7 +21,7 @@ julia> Scheduling.save(S, "/absolute/path/to/the/file.tex")
 julia> Scheduling.save(S, "../relative/path/to/the/file.tex", compile = true)
 ```
 """
-function save(S::Schedule, output_file::String; compile = false)
+function save(S::Schedule, output_file::String = "Schedule.tex"; compile = false)
     file_path = abspath(output_file)
     build_dir = dirname(file_path)
     if !isdir(build_dir)
@@ -52,7 +55,7 @@ function save(S::Schedule, output_file::String; compile = false)
         write(f, "% Processors", "\n")
         for i in 1:m
             M = S.machines[i]
-            write(f, "\\fill[gray!15] (0,$(i - 1)) rectangle ($cmax, $i);", "\t")
+            write(f, "\\fill[gray!15] (0,$(i - 1)) rectangle ($(Int(ceil(cmax))), $i);", "\t")
             write(f, "\\node[left,xshift=-0.25cm] at (0,0.5+$(i - 1)) {\$$(M.name)\$};", " % $M", "\n")
         end
 
@@ -76,5 +79,74 @@ function save(S::Schedule, output_file::String; compile = false)
         if compile
             @async run(`pdflatex -output-directory $build_dir $file_path`)
         end
+    end
+end
+
+"""
+    plot(S::Schedule;
+         animate = false, sizex = 800, sizey = 500,
+         output_file::String = "Schedule.gif", fps = 1)
+
+Plots a schedule. The optional arguments are taken into account if `animate` is set to `true`. Then, a `gif` file is generated.
+
+# Examples
+```julia-repl
+julia> Scheduling.plot(S)
+julia> Scheduling.plot(S, animate = true)
+```
+"""
+function plot(S::Schedule; animate = false, sizex = 800, sizey = 500, output_file::String = "Schedule.gif", fps = 1)
+    if animate
+        file_path = abspath(output_file)
+        build_dir = dirname(file_path)
+        if !isdir(build_dir)
+            mkpath(build_dir)
+        end
+    end
+
+    # Find the number of machines
+    m       = size(S.machines)[1]
+    # Find the length of a schedule
+    cmax    = float(maximum(A->A.C, S.assignments))
+
+    rectangle(w::Float64, h::Int64, x::Float64, y::Int64) =
+        Plots.Shape(x .+ [0,w,w,0], y .+ [0,0,h,h])
+
+    Plots.theme(:juno)
+    Plots.pyplot(size = (sizex, sizey), legend = false)
+    Plots.plot(xlims = (0, cmax),
+               ylims = (0, m),
+               yflip = true,
+               ytickfont = font(18, "Courier New"),
+               margin = 15px)
+
+    # Generate yticks
+    Plots.yticks!([i - 0.5 for i in 1:m],
+                  [S.machines[i].name for i in 1:m])
+
+    if animate
+        anim = Plots.Animation()
+        Plots.frame(anim)
+    end
+
+    for A in S.assignments
+        x = float(A.S)
+        y = findfirst(x->x==A.M, S.machines) - 1
+        w = float(A.C-A.S)
+        h = 1
+
+        Plots.plot!(rectangle(w, h, x, y))
+        Plots.annotate!([(x+w/2, y+h/2,
+                         Plots.text(A.J.name, :center, 14, "Courier New"))])
+
+        if animate
+            Plots.frame(anim)
+        end
+    end
+
+    if animate
+        Plots.gif(anim, output_file, fps = fps)
+    else
+        Plots.current()
     end
 end
