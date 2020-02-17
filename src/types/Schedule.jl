@@ -7,9 +7,23 @@ mutable struct Schedule
     end
 end
 
-function save(S::Schedule, file::String; compile = false)
-    file_path = abspath(file)
+"""
+    save(S::Schedule, output_file::String; compile = false)
+
+Generates a TeX file with a tikz representation of a schedule. An optional parameter `compile` determines whether the output file should be automatically compiled using `pdflatex`. If the `output_file` exists, then it will be replaced without any prompt. All the intermediate directories will be created if needed.
+
+# Examples
+```julia-repl
+julia> Scheduling.save(S, "/absolute/path/to/the/file.tex")
+julia> Scheduling.save(S, "../relative/path/to/the/file.tex", compile = true)
+```
+"""
+function save(S::Schedule, output_file::String; compile = false)
+    file_path = abspath(output_file)
     build_dir = dirname(file_path)
+    if !isdir(build_dir)
+        mkpath(build_dir)
+    end
 
     open(file_path, "w") do f
         write(f, """%!TEX program=pdflatex
@@ -35,13 +49,6 @@ function save(S::Schedule, file::String; compile = false)
         # Find the length of a schedule
         cmax    = float(maximum(A->A.C, S.assignments))
 
-        write(f, """% Draw the horizontal axis
-                \\draw (0,$m) -- ($cmax,$m);
-                % Mark integers on this axis
-                \\foreach \\i in {0,1,2,...,$(Int(ceil(cmax)))}
-                    \\draw (\\i, $m.3) node[below] {\\i}--++(0,-.3);
-                """)
-
         write(f, "% Processors", "\n")
         for i in 1:m
             M = S.machines[i]
@@ -51,8 +58,15 @@ function save(S::Schedule, file::String; compile = false)
 
         write(f, "% Jobs", "\n")
         for A in S.assignments
-            write(f, "\\path ($(float(A.S)),$(findfirst(x->x==A.M, S.machines))) node[burst={\$$(A.J.name)\$}{$(float(A.C-A.S))}, fill=white];", " % $A", "\n")
+            write(f, "\\path ($(float(A.S))-.015,$(findfirst(x->x==A.M, S.machines))) node[burst={\$$(A.J.name)\$}{$(float(A.C-A.S))}, fill=white];", " % $A", "\n")
         end
+
+        write(f, """% Draw the horizontal axis
+                \\draw (0,$m-.015) -- ($cmax,$m-.015);
+                % Mark integers on this axis
+                \\foreach \\i in {0,1,2,...,$(Int(ceil(cmax)))}
+                    \\draw (\\i, $m.3) node[below] {\\i}--++(0,-.3);
+                """)
 
         write(f, """\\end{tikzpicture}
                 \\end{document}
