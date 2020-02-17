@@ -1,8 +1,9 @@
 mutable struct Schedule
     jobs::Jobs
+    machines::Machines
     assignments::JobAssignments
-    function Schedule(jobs = Jobs(), assignments = JobAssignments())
-        return new(jobs, assignments)
+    function Schedule(jobs = Jobs(), machines = Machines(), assignments = JobAssignments())
+        return new(jobs, machines, assignments)
     end
 end
 
@@ -30,7 +31,7 @@ function save(S::Schedule, file::String; compile = false)
                 """)
 
         # Find the number of machines
-        m       = Int(maximum(A->A.M, S.assignments))
+        m       = size(S.machines)[1]
         # Find the length of a schedule
         cmax    = float(maximum(A->A.C, S.assignments))
 
@@ -43,13 +44,14 @@ function save(S::Schedule, file::String; compile = false)
 
         write(f, "% Processors", "\n")
         for i in 1:m
+            M = S.machines[i]
             write(f, "\\fill[gray!15] (0,$(i - 1)) rectangle ($cmax, $i);", "\t")
-            write(f, "\\node[left,xshift=-0.25cm] at (0,0.5+$(i - 1)) {\$M_$i\$};", " % M$i", "\n")
+            write(f, "\\node[left,xshift=-0.25cm] at (0,0.5+$(i - 1)) {\$$(M.name)\$};", " % $M", "\n")
         end
 
         write(f, "% Jobs", "\n")
         for A in S.assignments
-            write(f, "\\path ($(float(A.S)),$(A.M)) node[burst={\$$(A.J.name)\$}{$(float(A.C-A.S))}, fill=white];", " % $A", "\n")
+            write(f, "\\path ($(float(A.S)),$(findfirst(x->x==A.M, S.machines))) node[burst={\$$(A.J.name)\$}{$(float(A.C-A.S))}, fill=white];", " % $A", "\n")
         end
 
         write(f, """\\end{tikzpicture}
