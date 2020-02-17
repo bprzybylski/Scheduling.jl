@@ -10,10 +10,10 @@ push!(S.machines, Scheduling.Machine("M_3"))
 push!(S.machines, Scheduling.Machine("M_4"))
 
 # Create a set of jobs
-push!(S.jobs, Scheduling.Job(name = "J_1", p = 5))
-push!(S.jobs, Scheduling.Job(name = "J_2", p = 3))
-push!(S.jobs, Scheduling.Job(name = "J_3", p = 2))
-push!(S.jobs, Scheduling.Job(name = "J_4", p = 6))
+push!(S.jobs, Scheduling.Job("J_1", p = 5))
+push!(S.jobs, Scheduling.Job("J_2", p = 3))
+push!(S.jobs, Scheduling.Job("J_3", p = 2))
+push!(S.jobs, Scheduling.Job("J_4", p = 6))
 
 # Assign jobs to machines
 push!(S.assignments, Scheduling.JobAssignment(S.jobs[1], S.machines[1], 2, 7))

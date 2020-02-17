@@ -5,7 +5,7 @@ struct Job
     r::Rational{UInt64}  # ready time
     d::Rational{Int64}  # due date
     D::Rational{UInt64}  # deadline
-    function Job(;name = "J", p = 1, w = 1, r = 0, d = Inf, D = Inf)
+    function Job(name::String; p = 1, w = 1, r = 0, d = Inf, D = Inf)
         if r + p > D
             error("It is impossible for a job with [r + p > D] to exist.")
         end
