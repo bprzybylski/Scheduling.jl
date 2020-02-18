@@ -51,7 +51,7 @@ function Jobs(P::Array{Rational{Int}, 1})
         if i < 10
             push!(J, Job("J_$i", p = P[i]))
         else
-            push!(M, Job("J_{$i}", p = P[i]))
+            push!(J, Job("J_{$i}", p = P[i]))
         end
     end
 
