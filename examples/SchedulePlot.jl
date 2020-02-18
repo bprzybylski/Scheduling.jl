@@ -1,7 +1,7 @@
 using Scheduling
 
 # Create a new schedule
-S = Scheduling.Schedule(Jobs([5, 3, 2, 6]), Machines(4))
+S = Schedule(Jobs([5, 3, 2, 6]), Machines(4))
 
 # Assign jobs to machines
 push!(S.assignments, JobAssignment(S.jobs[1], S.machines[1], 2, 7))
