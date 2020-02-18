@@ -1,10 +1,12 @@
+export Job
+
 struct Job
     name::String
-    p::Rational{UInt64} # basic processing time
-    w::Rational{Int64}  # weight
-    r::Rational{UInt64}  # ready time
-    d::Rational{Int64}  # due date
-    D::Rational{UInt64}  # deadline
+    p::Rational{UInt}     # basic processing time
+    w::Rational{Int}      # weight
+    r::Rational{UInt}     # ready time
+    d::Rational{Int}      # due date
+    D::Rational{UInt}     # deadline
     function Job(name::String; p = 1, w = 1, r = 0, d = Inf, D = Inf)
         if r + p > D
             error("It is impossible for a job with [r + p > D] to exist.")

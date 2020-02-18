@@ -1,9 +1,11 @@
+export JobAssignment
+
 mutable struct JobAssignment
     J::Job
     M::Machine
-    S::Rational{UInt64} # starting time
-    C::Rational{UInt64} # completion time
-    function JobAssignment(J, M, S, C)
+    S::Rational{UInt}     # starting time
+    C::Rational{UInt}     # completion time
+    function JobAssignment(J::Job, M::Machine, S, C)
         if S >= C
             error("The execution time must be positive.")
         end

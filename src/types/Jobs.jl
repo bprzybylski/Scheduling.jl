@@ -1,6 +1,6 @@
-const Jobs = Vector{Job}
+export Jobs
 
-function Base.show(io::IO, ::MIME"text/plain", S::Jobs)
+function Base.show(io::IO, ::MIME"text/plain", S::Vector{Job})
     print("A set of $(size(S)[1]) job(s):")
     for J in S
         print(io, "\n\t")
@@ -9,11 +9,20 @@ function Base.show(io::IO, ::MIME"text/plain", S::Jobs)
 end
 
 """
-    function generateJobs(n::Int)
+    function Jobs()
+
+Generates an empty vector of `Job` elements.
+"""
+function Jobs()
+    return Vector{Job}()
+end
+
+"""
+    function Jobs(n::Int)
 
 Generates a set of `n` identical unit jobs, denoted by `J_1`, `J_2`, etc.
 """
-function generateJobs(n::Int)
+function Jobs(n::Int)
     J = Jobs()
 
     for i in 1:n
@@ -28,14 +37,14 @@ function generateJobs(n::Int)
 end
 
 """
-    function generateJobs(P::Array{Rational{Int}, 1})
+    function Jobs(P::Array{Rational{Int}, 1})
 
-Generates a set of jobs with basic processing times determined by the `P` array, by `Q_1`, `Q_2`, etc.
+Generates a set of jobs with basic processing times determined by the `P` array, denoted by `J_1`, `J_2`, etc.
 """
-function generateJobs(P::Array{Rational{Int}, 1})
+function Jobs(P::Array{Rational{Int}, 1})
     J = Jobs()
 
-    for i in 1:size(P)[1]
+    for i in 1:length(P)
         if P[i] <= 0
             error("Job $i cannot have a non-positive processing time.")
         end
@@ -48,3 +57,10 @@ function generateJobs(P::Array{Rational{Int}, 1})
 
     return J
 end
+
+"""
+    function Jobs(P::Array{Int, 1})
+
+Generates a set of jobs with basic processing times determined by the `P` array, denoted by `J_1`, `J_2`, etc.
+"""
+Jobs(P::Array{Int, 1}) = Jobs(Array{Rational{Int},1}(P))

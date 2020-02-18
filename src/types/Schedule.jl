@@ -1,27 +1,29 @@
+export Schedule
+
 using Plots
 using Plots.PlotMeasures
 
 mutable struct Schedule
-    jobs::Jobs
-    machines::Machines
-    assignments::JobAssignments
+    jobs::Vector{Job}
+    machines::Vector{Machine}
+    assignments::Vector{JobAssignment}
     function Schedule(jobs = Jobs(), machines = Machines(), assignments = JobAssignments())
         return new(jobs, machines, assignments)
     end
 end
 
 """
-    save(S::Schedule, output_file::String = "Schedule.tex"; compile = false)
+    TeX(S::Schedule, output_file::String = "Schedule.tex"; compile = false)
 
 Generates a TeX file with a tikz representation of a schedule. An optional parameter `compile` determines whether the output file should be automatically compiled using `pdflatex`. If the `output_file` exists, then it will be replaced without any prompt. All the intermediate directories will be created if needed.
 
 # Examples
 ```julia-repl
-julia> Scheduling.save(S, "/absolute/path/to/the/file.tex")
-julia> Scheduling.save(S, "../relative/path/to/the/file.tex", compile = true)
+julia> Scheduling.TeX(S, "/absolute/path/to/the/file.tex")
+julia> Scheduling.TeX(S, "../relative/path/to/the/file.tex", compile = true)
 ```
 """
-function save(S::Schedule, output_file::String = "Schedule.tex"; compile = false)
+function TeX(S::Schedule, output_file::String = "Schedule.tex"; compile = false)
     file_path = abspath(output_file)
     build_dir = dirname(file_path)
     if !isdir(build_dir)
@@ -48,7 +50,7 @@ function save(S::Schedule, output_file::String = "Schedule.tex"; compile = false
                 """)
 
         # Find the number of machines
-        m       = size(S.machines)[1]
+        m       = length(S.machines)
         # Find the length of a schedule
         cmax    = float(maximum(A->A.C, S.assignments))
 
@@ -105,7 +107,7 @@ function plot(S::Schedule; animate = false, sizex = 800, sizey = 500, output_fil
     end
 
     # Find the number of machines
-    m       = size(S.machines)[1]
+    m       = length(S.machines)
     # Find the length of a schedule
     cmax    = float(maximum(A->A.C, S.assignments))
 

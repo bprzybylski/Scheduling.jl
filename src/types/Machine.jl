@@ -1,6 +1,8 @@
+export Machine
+
 struct Machine
     name::String
-    s::Rational{UInt64} # speed
+    s::Rational{UInt}   # speed
     function Machine(name::String; s = 1)
         return new(name, s)
     end
