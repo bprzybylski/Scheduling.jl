@@ -22,4 +22,4 @@ push!(S.assignments, JobAssignment(S.jobs[3], S.machines[1], 10, 12))
 push!(S.assignments, JobAssignment(S.jobs[4], S.machines[2], 5, 11))
 
 # Export the schedule
-Scheduling.TeX(S, "ScheduleSave.tex", compile = true)
+Scheduling.TeX(S, "ScheduleTeX.tex", compile = true)
