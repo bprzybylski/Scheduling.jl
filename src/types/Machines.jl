@@ -9,7 +9,7 @@ function Base.show(io::IO, ::MIME"text/plain", S::Vector{Machine})
 end
 
 """
-    function Machines()
+    Machines()
 
 Generates an empty vector of `Machine` elements.
 """
@@ -18,7 +18,7 @@ function Machines()
 end
 
 """
-    function Machines(m::Int)
+    Machines(m::Int)
 
 Generates a set of `m` identical parallel machines, denoted by `P_1`, `P_2`, etc.
 """
@@ -37,7 +37,7 @@ function Machines(m::Int)
 end
 
 """
-    function Machines(S::Array{Rational{Int}, 1})
+    Machines(S::Array{Rational{Int}, 1})
 
 Generates a set of machines with speeds determined by the `S` array, denoted by `Q_1`, `Q_2`, etc.
 """
@@ -59,7 +59,7 @@ function Machines(S::Array{Rational{Int}, 1})
 end
 
 """
-    function Machines(S::Array{Int, 1})
+    Machines(S::Array{Int, 1})
 
 Generates a set of machines with speeds determined by the `S` array, denoted by `Q_1`, `Q_2`, etc.
 """

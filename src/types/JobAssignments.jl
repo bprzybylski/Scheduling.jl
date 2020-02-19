@@ -9,7 +9,7 @@ function Base.show(io::IO, ::MIME"text/plain", S::Vector{JobAssignment})
 end
 
 """
-    function JobAssignments()
+    JobAssignments()
 
 Generates an empty vector of `JobAssignment` elements.
 """

@@ -9,7 +9,7 @@ function Base.show(io::IO, ::MIME"text/plain", S::Vector{Job})
 end
 
 """
-    function Jobs()
+    Jobs()
 
 Generates an empty vector of `Job` elements.
 """
@@ -18,7 +18,7 @@ function Jobs()
 end
 
 """
-    function Jobs(n::Int)
+    Jobs(n::Int)
 
 Generates a set of `n` identical unit jobs, denoted by `J_1`, `J_2`, etc.
 """
@@ -37,7 +37,7 @@ function Jobs(n::Int)
 end
 
 """
-    function Jobs(P::Array{Rational{Int}, 1})
+    Jobs(P::Array{Rational{Int}, 1})
 
 Generates a set of jobs with basic processing times determined by the `P` array, denoted by `J_1`, `J_2`, etc.
 """
@@ -59,7 +59,7 @@ function Jobs(P::Array{Rational{Int}, 1})
 end
 
 """
-    function Jobs(P::Array{Int, 1})
+    Jobs(P::Array{Int, 1})
 
 Generates a set of jobs with basic processing times determined by the `P` array, denoted by `J_1`, `J_2`, etc.
 """
