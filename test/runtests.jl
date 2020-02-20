@@ -1,4 +1,4 @@
-using Scheduling, Test
+using Scheduling, Scheduling.Objectives, Test
 
 @testset "Types" begin
     @testset "Job" begin
@@ -165,4 +165,89 @@ using Scheduling, Test
               S.machines === M &&
               S.assignments === A
     end
+end
+
+@testset "Objectives" begin
+      # Create a set of jobs
+      J = Jobs()
+      push!(J, Job("J", p = 7, d = 6, w = 2))
+      push!(J, Job("J", p = 2, d = 4))
+      push!(J, Job("J", p = 4, d = 1000, w = -1))
+      push!(J, Job("J", p = 8, d = 1273//3))
+      push!(J, Job("J", p = 3, w = 3))
+      push!(J, Job("J", p = 4, w = 6))
+      push!(J, Job("J", p = 8, w = -4//3))
+
+      # Create a set of machines
+      M = Machines(3)
+
+      # A schedule
+      S1 = Schedule(J, M, [
+            JobAssignment(J[1], M[1], 0, 7)           # (C, U, L, T) = (7, 1, 1, 1)
+            JobAssignment(J[2], M[2], 1, 3)           # (C, U, L, T) = (3, 0, -1, 0)
+            JobAssignment(J[3], M[1], 7, 11)          # (C, U, L, T) = (11, 0, -989, 0)
+            JobAssignment(J[4], M[3], 1//3, 25//3)    # (C, U, L, T) = (25//3, 0, -1248//3, 0)
+      ])
+
+      # A schedule with negative weights and a tardy job
+      S2 = Schedule(J, M, [
+            JobAssignment(J[3], M[1], 2000, 2004)     # (C, U, L, T) = (2004, 1, 1004, 1004)
+            JobAssignment(J[7], M[2], 2//3, 26//3)    # (C, U, L, T) = (26//3, 0, -Inf, 0)
+      ])
+
+      # A schedule with infinite due dates
+      S3 = Schedule(J, M, [
+            JobAssignment(J[5], M[1], 1, 4)           # (C, U, L, T) = (4, 0, -Inf, 0)
+            JobAssignment(J[6], M[2], 101//2, 109//2) # (C, U, L, T) = (109//2, 0, -Inf, 0)
+            JobAssignment(J[7], M[3], 0, 8)           # (C, U, L, T) = (8, 0, -Inf, 0)
+      ])
+
+      @testset "cmax" begin
+            @test cmax(S1) == 11
+            @test cmax(S2) == 2004
+            @test cmax(S3) == 109//2
+      end
+
+      @testset "csum" begin
+            @test csum(S1) == 88//3
+            @test csum(S2) == 6038//3
+            @test csum(S3) == 133//2
+      end
+
+      @testset "wcsum" begin
+            @test wcsum(S1) == 43//3
+            @test wcsum(S2) == -18140//9
+            @test wcsum(S3) == 985//3
+      end
+
+      @testset "lmax" begin
+            @test lmax(S1) == 1
+            @test lmax(S2) == 1004
+            @test lmax(S3) == -Inf
+            @test lmax(S3) == -1//0
+      end
+
+      @testset "nt" begin
+            @test nt(S1) == 1
+            @test nt(S2) == 1
+            @test nt(S3) == 0
+      end
+
+      @testset "wnt" begin
+            @test wnt(S1) == 2
+            @test wnt(S2) == -1
+            @test wnt(S3) == 0
+      end
+
+      @testset "tsum" begin
+            @test tsum(S1) == 1
+            @test tsum(S2) == 1004
+            @test tsum(S3) == 0
+      end
+
+      @testset "wtsum" begin
+            @test wtsum(S1) == 2
+            @test wtsum(S2) == -1004
+            @test wtsum(S3) == 0
+      end
 end
