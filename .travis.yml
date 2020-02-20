@@ -1,0 +1,17 @@
+# Documentation: http://docs.travis-ci.com/user/languages/julia/
+language: julia
+os:
+  - linux
+  - osx
+julia:
+  - 1.0
+  - 1.1
+  - 1.2
+  - nightly
+notifications:
+  email: false
+matrix:
+  fast_finish: true
+  allow_failures:
+    - julia: nightly
+codecov: true
