@@ -1,4 +1,4 @@
-export JobAssignment
+export JobAssignment, JobAssignments
 
 mutable struct JobAssignment
     J::Job
@@ -27,4 +27,21 @@ function Base.show(io::IO, A::JobAssignment)
     print(io, " → ")
     printstyled(io, "$(A.M.name)"; bold = true, color = :light_yellow)
     print(io, "[$(rtos(A.S)), $(rtos(A.C)))")
+end
+
+function Base.show(io::IO, ::MIME"text/plain", S::Vector{JobAssignment})
+    print("A set of $(size(S)[1]) assignment(s):")
+    for A in S
+        print(io, "\n\t")
+        show(io, A)
+    end
+end
+
+"""
+    JobAssignments()
+
+Generates an empty vector of `JobAssignment` elements.
+"""
+function JobAssignments()
+    return Vector{JobAssignment}()
 end
