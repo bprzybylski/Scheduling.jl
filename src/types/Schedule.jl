@@ -70,7 +70,7 @@ function TeX(S::Schedule, output_file::String = "Schedule.tex"; compile = false)
         end
 
         write(f, """% Draw the horizontal axis
-                \\draw (0,$m-.015) -- ($cmax,$m-.015);
+                \\draw (0,$m-.015) -- ($(Int(ceil(cmax))),$m-.015);
                 % Mark integers on this axis
                 \\foreach \\i in {0,1,2,...,$(Int(ceil(cmax)))}
                     \\draw (\\i, $m.3) node[below] {\\i}--++(0,-.3);
