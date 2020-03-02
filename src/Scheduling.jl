@@ -13,4 +13,8 @@ include("objectives/tsum.jl")
 include("objectives/nt.jl")
 end
 
+module Algorithms
+include("algorithms/list.jl")
+end
+
 end # module
