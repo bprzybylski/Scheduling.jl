@@ -50,9 +50,12 @@ function TeX(S::Schedule, output_file::String = "Schedule.tex"; compile = false)
                 """)
 
         # Find the number of machines
-        m       = length(S.machines)
+        m = length(S.machines)
         # Find the length of a schedule
-        cmax    = float(maximum(A->A.C, S.assignments))
+        cmax = 0
+        if length(S.assignments) > 0
+            cmax = maximum(A->A.C, S.assignments)
+        end
 
         write(f, "% Processors", "\n")
         for i in 1:m
@@ -107,9 +110,12 @@ function plot(S::Schedule; animate = false, sizex = 800, sizey = 500, output_fil
     end
 
     # Find the number of machines
-    m       = length(S.machines)
+    m = length(S.machines)
     # Find the length of a schedule
-    cmax    = float(maximum(A->A.C, S.assignments))
+    cmax = 0
+    if length(S.assignments) > 0
+        cmax = maximum(A->A.C, S.assignments)
+    end
 
     rectangle(w::Float64, h::Int64, x::Float64, y::Int64) =
         Plots.Shape(x .+ [0,w,w,0], y .+ [0,0,h,h])
