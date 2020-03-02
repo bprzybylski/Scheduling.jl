@@ -1,4 +1,18 @@
 using Scheduling
+using DataStructures: PriorityQueue, peek
+
+# The following struct makes PriorityQueue keep the order of machines
+mutable struct MachineLoad
+    index::UInt
+    load::Rational{UInt}
+end
+
+function Base.isless(a::MachineLoad, b::MachineLoad)
+    if a.load < b.load || (a.load == b.load && a.index < b.index)
+        return true
+    end
+    return false
+end
 
 """
     list(J::Vector{Job}, M::Vector{Machine}; copy = false)
@@ -29,16 +43,17 @@ function list(J::Vector{Job}, M::Vector{Machine}; copy = false)
     # Generate an empty job assignments list
     A = JobAssignments()
 
-    # All the machines are allocated zero jobs at the beginning
-    ma = fill(Rational{Int}(0), length(M))
+    # All the machines are allocated zero load at the beginning
+    pq = PriorityQueue{UInt, MachineLoad}()
+    map(mi -> pq[mi] = MachineLoad(UInt(mi), Rational{UInt}(0)), 1:length(M))
 
     for j in J
         # Find a machine that has the minimum load
-        mi = argmin(ma)
+        mi, ml = peek(pq)
         # Push an assignment to the list
-        push!(A, JobAssignment(j, M[mi], ma[mi], ma[mi] + j.p))
+        push!(A, JobAssignment(j, M[mi], ml.load, ml.load + j.p))
         # Update the load
-        ma[mi] = ma[mi] + j.p
+        pq[mi] = MachineLoad(pq[mi].index, pq[mi].load + j.p)
     end
 
     return Schedule(J, M, A)
