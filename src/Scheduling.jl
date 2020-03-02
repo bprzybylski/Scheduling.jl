@@ -15,6 +15,7 @@ end
 
 module Algorithms
 include("algorithms/list.jl")
+include("algorithms/P__Cmax.jl")
 end
 
 end # module
