@@ -19,6 +19,7 @@ module Algorithms
 include("algorithms/list.jl")
 include("algorithms/P__Cmax/IP.jl")
 include("algorithms/P__Cmax/MR.jl")
+include("algorithms/P__Cmax/HS.jl")
 end
 
 end # module
