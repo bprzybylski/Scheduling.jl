@@ -171,35 +171,35 @@ function P__Cmax_HS_DABIN(J::Vector{Job}, eps::Rational{Int})
     end
 
     # Push the elements to bins
-    bin_idx = 1
     for i in 1:length(J_small)
+        bin_idx = 1
+
+        while bin_idx <= no_of_bins && bin_packing[bin_idx].load + J_small[i].p > 1 + eps
+            bin_idx += 1
+        end
+
         if bin_idx > no_of_bins
             # Start a new bin
             push!(bin_packing, P__Cmax_HS_BinConfig(Rational{Int}(0), []))
             no_of_bins += 1
         end
 
-        # Check if it is possible to fit a small element into a bin
-        if bin_packing[bin_idx].load + J_small[i].p <= 1 + eps
-            bin_packing[bin_idx].load += J_small[i].p
-            push!(bin_packing[bin_idx].assignments, J_small_idx[i])
-        else
-            bin_idx += 1
-        end
+        bin_packing[bin_idx].load += J_small[i].p
+        push!(bin_packing[bin_idx].assignments, J_small_idx[i])
     end
 
     return no_of_bins, bin_packing
 end
 
 """
-    P__Cmax_HS(J::Vector{Job}, M::Vector{Machine}; eps = 1//10, copy = false)
+    P__Cmax_HS(J::Vector{Job}, M::Vector{Machine}; eps = 1//10, copy = false, verbose = false)
 
 Finds an approximation solution of the P||Cmax problem based on the algorithms proposed by Hochbaum and Shmoys (1987). If `copy` is set to true, then the returned structure will refer to the copies of the input vectors.
 
 # References
 * D.S. Hochbaum and D.B. Shmoys, Using dual approximation algorithms for scheduling problems theoretical and practical results, Journal of the ACM, 34(1):144–162 (1987), doi: 10.1145/7531.7535
 """
-function P__Cmax_HS(J::Vector{Job}, M::Vector{Machine}; eps = 1//10, copy = false)
+function P__Cmax_HS(J::Vector{Job}, M::Vector{Machine}; eps = 1//10, copy = false, verbose = false)
     if copy
         J = Base.copy(J)
         M = Base.copy(M)
@@ -216,7 +216,10 @@ function P__Cmax_HS(J::Vector{Job}, M::Vector{Machine}; eps = 1//10, copy = fals
     # Set the lower and the upper bound on the cmax
     cmax_lb = max(sum(X -> X.p, J) // m, maximum(X -> X.p, J))
     cmax_ub = 2*cmax_lb
-    println("* Starting with cmax_lb=$(float(cmax_lb)), cmax_ub=$(float(cmax_ub))")
+
+    if verbose
+        println("* Starting with cmax_lb=$(float(cmax_lb)), cmax_ub=$(float(cmax_ub))")
+    end
 
     # Set the best solution found
     best_solution = nothing
@@ -225,17 +228,23 @@ function P__Cmax_HS(J::Vector{Job}, M::Vector{Machine}; eps = 1//10, copy = fals
     while (cmax_ub//cmax_lb > 101//100) && (cmax_ub - cmax_lb > 1)
         # Find the middle point between upper and lower bound
         d = (cmax_ub + cmax_lb)//2
-        println("* Trying d=$(float(d)) (cmax_lb=$(float(cmax_lb)), cmax_ub=$(float(cmax_ub)))")
+        if verbose
+            println("* Trying d=$(float(d)) (cmax_lb=$(float(cmax_lb)), cmax_ub=$(float(cmax_ub)))")
+        end
 
         # Scale all the job processing times
         JC = map(X -> Job(X.name; p = X.p//d) , J)
         # Perform a dual approximation for bin packing
         machines_expected, solution = P__Cmax_HS_DABIN(JC, eps)
         if (machines_expected > m)
-            println("  Failure: $(machines_expected) machines expected, got $(m)")
+            if verbose
+                println("  Failure: $(machines_expected) machines expected, got $(m)")
+            end
             cmax_lb = d
         else
-            println("  Success: decreasing cmax_ub to $(float(d))")
+            if verbose
+                println("  Success: decreasing cmax_ub to $(float(d))")
+            end
             cmax_ub = d
             best_solution = solution
         end
