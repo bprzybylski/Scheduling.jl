@@ -1,14 +1,14 @@
 using JuMP, GLPK
 
 """
-    P__Cmax(J::Vector{Job}, M::Vector{Machine}; optimizer = GLPK.Optimizer, copy = false)
+    P__Cmax_IP(J::Vector{Job}, M::Vector{Machine}; optimizer = GLPK.Optimizer, copy = false)
 
 Solves the P||Cmax problem by applying the simple IP proposed by Drozdowski (2009, p. 23). By default, the open source GLPK optimizer together with JuMP is used. If `copy` is set to true, then the returned structure will refer to the copies of the input vectors.
 
 # References
 * M.Drozdowski, Scheduling for Parallel Processing, Springer-Verlag, London, 2009, ISBN: 978-1-84882-309-9.
 """
-function P__Cmax(J::Vector{Job}, M::Vector{Machine}; optimizer = GLPK.Optimizer, copy = false)
+function P__Cmax_IP(J::Vector{Job}, M::Vector{Machine}; optimizer = GLPK.Optimizer, copy = false)
     if copy
         J = copy(J)
         M = copy(M)
