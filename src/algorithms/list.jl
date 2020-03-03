@@ -1,19 +1,6 @@
 using Scheduling
 using DataStructures: PriorityQueue, peek
 
-# The following struct makes PriorityQueue keep the order of machines
-mutable struct MachineLoad
-    index::UInt
-    load::Rational{UInt}
-end
-
-function Base.isless(a::MachineLoad, b::MachineLoad)
-    if a.load < b.load || (a.load == b.load && a.index < b.index)
-        return true
-    end
-    return false
-end
-
 """
     list(J::Vector{Job}, M::Vector{Machine}; copy = false)
 

@@ -5,6 +5,8 @@ include("types/Machine.jl")
 include("types/JobAssignment.jl")
 include("types/Schedule.jl")
 
+include("types/MachineLoad.jl")
+
 module Objectives
 include("objectives/cmax.jl")
 include("objectives/csum.jl")
