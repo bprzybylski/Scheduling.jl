@@ -4,12 +4,12 @@
 An approximation approach to the online version of the P||Cmax problem proposed by Fleischer and Wahl (2000, p. 345). If `copy` is set to true, then the returned structure will refer to the copies of the input vectors.
 
 # References
-* R. Fleischer and M.Wahl, On-line scheduling revisited, Journal of Scheduling, 3:343–353 (2000), doi: 10.1002/1099-1425(200011/12)3:6<343::AID-JOS54>3.0.CO;2-2
+* R. Fleischer and M. Wahl, On-line scheduling revisited, Journal of Scheduling, 3:343–353 (2000), doi: 10.1002/1099-1425(200011/12)3:6<343::AID-JOS54>3.0.CO;2-2
 """
 function P__Cmax_MR(J::Vector{Job}, M::Vector{Machine}; copy = false)
     if copy
-        J = copy(J)
-        M = copy(M)
+        J = Base.copy(J)
+        M = Base.copy(M)
     end
 
     # Generate an empty job assignments list

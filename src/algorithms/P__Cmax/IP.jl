@@ -10,8 +10,8 @@ Solves the P||Cmax problem by applying the simple IP proposed by Drozdowski (200
 """
 function P__Cmax_IP(J::Vector{Job}, M::Vector{Machine}; optimizer = GLPK.Optimizer, copy = false)
     if copy
-        J = copy(J)
-        M = copy(M)
+        J = Base.copy(J)
+        M = Base.copy(M)
     end
 
     for j in J
