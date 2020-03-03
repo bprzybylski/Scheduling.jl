@@ -14,17 +14,16 @@ function P__Cmax_IP(J::Vector{Job}, M::Vector{Machine}; optimizer = GLPK.Optimiz
         M = Base.copy(M)
     end
 
-    for j in J
-        if denominator(j.p) != 1
-            error("Job $(j.name) has a non-integer processing time.")
-        end
-    end
+    # Find the lowest common multiple of all the denominators
+    J_lcm = lcm(map(X -> denominator(X.p) , J))
+    # Generate a set of processing times for normalized jobs
+    P = map(X -> X.p * J_lcm, J)
 
     # Set up the model
     model = Model(optimizer)
 
     # Get the number of jobs
-    n = length(J)
+    n = length(P)
     # Get the number of machines
     m = length(M)
 
@@ -43,7 +42,7 @@ function P__Cmax_IP(J::Vector{Job}, M::Vector{Machine}; optimizer = GLPK.Optimiz
 
     # [2.7] Each machine should have a load lower or equal to cmax
     for j in 1:m
-        @constraint(model, sum(x[i,j]*J[i].p for i=1:n) <= cmax)
+        @constraint(model, sum(x[i,j]*P[i] for i=1:n) <= cmax)
     end
 
     optimize!(model)
