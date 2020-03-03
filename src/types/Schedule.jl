@@ -1,5 +1,6 @@
 export Schedule
 
+using JLD2
 using Plots
 using Plots.PlotMeasures
 
@@ -157,4 +158,38 @@ function plot(S::Schedule; animate = false, sizex = 800, sizey = 500, output_fil
     else
         Plots.current()
     end
+end
+
+"""
+    save(S::Schedule, output_file::String = "Schedule.jld")
+
+Saves a schedule to a file so it can be reloaded later.
+"""
+function save(S::Schedule, output_file::String = "Schedule.jld")
+    file_path = abspath(output_file)
+    build_dir = dirname(file_path)
+    if !isdir(build_dir)
+        mkpath(build_dir)
+    end
+
+    jldopen(output_file, "w") do f
+        f["S"] = S
+    end
+
+    return
+end
+
+"""
+    load(input_file::String = "Schedule.jld")
+
+Loads a schedule from a file. Return a reference to a loaded schedule.
+"""
+function load(input_file::String = "Schedule.jld")
+    S = Schedule()
+
+    jldopen(input_file, "r") do f
+        S = f["S"]
+    end
+    
+    return S
 end

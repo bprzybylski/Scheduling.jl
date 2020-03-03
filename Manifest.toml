@@ -108,6 +108,12 @@ git-tree-sha1 = "9143266ba77d3313a4cf61d8333a1970e8c5d8b6"
 uuid = "c87230d0-a227-11e9-1b43-d7ebe4e7570a"
 version = "0.2.4"
 
+[[FileIO]]
+deps = ["Pkg"]
+git-tree-sha1 = "2c84c57aced468fa21763c66d3bef33adcd09ec7"
+uuid = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
+version = "1.2.2"
+
 [[FixedPointNumbers]]
 git-tree-sha1 = "4aaea64dd0c30ad79037084f8ca2b94348e65eaa"
 uuid = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
@@ -152,6 +158,12 @@ version = "0.5.0"
 [[InteractiveUtils]]
 deps = ["LinearAlgebra", "Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
+
+[[JLD2]]
+deps = ["CodecZlib", "DataStructures", "FileIO", "Mmap", "Pkg", "Printf", "UUIDs"]
+git-tree-sha1 = "d6cfa7c24e27d7eaa2290372739c8298257dae16"
+uuid = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
+version = "0.1.12"
 
 [[JSON]]
 deps = ["Dates", "Mmap", "Parsers", "Unicode"]
