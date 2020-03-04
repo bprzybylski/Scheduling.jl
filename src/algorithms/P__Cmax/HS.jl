@@ -51,7 +51,7 @@ function P__Cmax_HS_BINS(n::Int,
     return ret_no_of_bins
 end
 
-function P__Cmax_HS_Q!(Q::Array{Array{Int64},}, # the set Q
+function P__Cmax_HS_Q!(Q::Array{Array{Int},}, # the set Q
                        n::Int, # number of elements in arrays
                        current_position::Int, # initial position
                        current_no_of_pieces::Array{Int},
@@ -93,17 +93,17 @@ function P__Cmax_HS_DABIN(J::Vector{Job}, eps::Rational{Int})
     J_large = J[J_large_idx]
 
     # Compute the constants
-    s = Int(ceil(1//eps^2))
+    s = Int(ceil(1//eps^2)) + 1
     iv = (1 - eps)//s
 
-    # Generate the array of lower bounds; here, 1:1:s means [1,2,...,s]
+    # Generate the array of length bounds; here, 1:1:s means [1,2,...,s]
     lbounds = eps .+ collect(1:1:s)*iv
 
     # Generate an array of zeros
     b = fill(0, s)
 
-    # Find the bounds for large jobs§
-    bounds2idx = Array{Array{Int64,1}}(undef, s)
+    # Find the bounds for large jobs
+    bounds2idx = Array{Array{Int,1}}(undef, s)
     # For each job in the set of large jobs
     for i in 1:length(J_large)
         # Find the first lower bound good for a big job
@@ -120,7 +120,7 @@ function P__Cmax_HS_DABIN(J::Vector{Job}, eps::Rational{Int})
     end
 
     # Reduce lower bounds and number of pieces
-    valid_bs_idx = findall(x -> x != 0, b)
+    valid_bs_idx = findall(x -> (x != 0), b)
     sub_b = b[valid_bs_idx]
     sub_lbounds = lbounds[valid_bs_idx]
     sub_bounds2idx = bounds2idx[valid_bs_idx]
@@ -130,7 +130,7 @@ function P__Cmax_HS_DABIN(J::Vector{Job}, eps::Rational{Int})
     current_no_of_pieces = fill(0, n)
 
     # Initialize the set Q
-    Q = Array{Int64,}[]
+    Q = Array{Int,}[]
     P__Cmax_HS_Q!(Q, n, 1, current_no_of_pieces, Rational{Int}(0), sub_b, sub_lbounds)
 
     # We start counting at 1 and this would be the real 0
@@ -139,20 +139,11 @@ function P__Cmax_HS_DABIN(J::Vector{Job}, eps::Rational{Int})
         bins[Tuple(q .+ 1)...] = 1
     end
 
-    selected_bin_configs = fill([Int64[]], Tuple(sub_b .+ 1))
+    selected_bin_configs = fill([Int[]], Tuple(sub_b .+ 1))
 
     # Determine the number of bins
     no_of_bins = P__Cmax_HS_BINS(n, sub_b, sub_lbounds, Q, bins, selected_bin_configs)
     res_config = selected_bin_configs[Tuple(sub_b .+ 1)...]
-
-    ########################################
-    # PART 2. Schedule all the small jobs. #
-    ########################################
-
-    # Find all the jobs that have processing times lower that eps
-    J_small_idx = findall(X -> X.p <= eps, J)
-    # Extract the jobs with low processing times
-    J_small = J[J_small_idx]
 
     bin_packing = Array{P__Cmax_HS_BinConfig}(undef, no_of_bins)
 
@@ -170,11 +161,21 @@ function P__Cmax_HS_DABIN(J::Vector{Job}, eps::Rational{Int})
         end
     end
 
+    ########################################
+    # PART 2. Schedule all the small jobs. #
+    ########################################
+
+    # Find all the jobs that have processing times lower that eps
+    J_small_idx = findall(X -> X.p <= eps, J)
+    # Extract the jobs with low processing times
+    J_small = J[J_small_idx]
+
+
     # Push the elements to bins
     for i in 1:length(J_small)
         bin_idx = 1
 
-        while bin_idx <= no_of_bins && bin_packing[bin_idx].load + J_small[i].p > 1 + eps
+        while bin_idx <= no_of_bins && bin_packing[bin_idx].load > 1
             bin_idx += 1
         end
 
@@ -222,10 +223,10 @@ function P__Cmax_HS(J::Vector{Job}, M::Vector{Machine}; eps = 1//10, copy = fals
     end
 
     # Set the best solution found
-    best_solution = nothing
+    best_bin_packing = nothing
 
     # Find the best bound for the instance
-    while (cmax_ub//cmax_lb > 101//100) && (cmax_ub - cmax_lb > 1)
+    while cmax_ub//cmax_lb > 101//100
         # Find the middle point between upper and lower bound
         d = (cmax_ub + cmax_lb)//2
         if verbose
@@ -233,12 +234,14 @@ function P__Cmax_HS(J::Vector{Job}, M::Vector{Machine}; eps = 1//10, copy = fals
         end
 
         # Scale all the job processing times
-        JC = map(X -> Job(X.name; p = X.p//d) , J)
+        JC = map(X -> Job(X.name; p = X.p//d), J)
         # Perform a dual approximation for bin packing
-        machines_expected, solution = P__Cmax_HS_DABIN(JC, eps)
-        if (machines_expected > m)
+        bins, bin_packing = P__Cmax_HS_DABIN(JC, eps)
+
+        if (bins > m)
             if verbose
-                println("  Failure: $(machines_expected) machines expected, got $(m)")
+                println("  Failure: $(m) machines available, $(bins) needed")
+                println("           Increasing cmax_lb to $(float(d))")
             end
             cmax_lb = d
         else
@@ -246,18 +249,16 @@ function P__Cmax_HS(J::Vector{Job}, M::Vector{Machine}; eps = 1//10, copy = fals
                 println("  Success: decreasing cmax_ub to $(float(d))")
             end
             cmax_ub = d
-            best_solution = solution
+            best_bin_packing = bin_packing
         end
     end
 
-    if best_solution != nothing
+    if best_bin_packing != nothing
         # For every bin in a solution (a machine)
-        for i in 1:length(best_solution)
+        for i in 1:length(best_bin_packing)
             load = Rational{Int}(0)
-            # Get the bin from the solution
-            bin = best_solution[i]
             # For every assignment of a job to a bin
-            for j in bin.assignments
+            for j in best_bin_packing[i].assignments
                 # Generate the JobAssignment
                 push!(A, JobAssignment(J[j], M[i], load, load + J[j].p))
                 # Increase the load
