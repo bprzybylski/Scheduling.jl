@@ -25,9 +25,9 @@ function P__Cmax_MR(J::Vector{Job}, M::Vector{Machine}; copy = false)
     end
 
     # All the machines are allocated zero load at the beginning
-    ml = Vector{MachineLoad}()
+    ml = Vector{Scheduling.MachineLoad}()
     for i in 1:m
-        push!(ml, MachineLoad(UInt(i), Rational{UInt}(0)))
+        push!(ml, Scheduling.MachineLoad(UInt(i), Rational{UInt}(0)))
     end
 
     # Set the parameters

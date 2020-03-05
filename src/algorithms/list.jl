@@ -31,8 +31,8 @@ function list(J::Vector{Job}, M::Vector{Machine}; copy = false)
     A = JobAssignments()
 
     # All the machines are allocated zero load at the beginning
-    pq = PriorityQueue{UInt, MachineLoad}()
-    map(mi -> pq[mi] = MachineLoad(UInt(mi), Rational{UInt}(0)), 1:length(M))
+    pq = PriorityQueue{UInt, Scheduling.MachineLoad}()
+    map(mi -> pq[mi] = Scheduling.MachineLoad(UInt(mi), Rational{UInt}(0)), 1:length(M))
 
     for j in J
         # Find a machine that has the minimum load
@@ -40,7 +40,7 @@ function list(J::Vector{Job}, M::Vector{Machine}; copy = false)
         # Push an assignment to the list
         push!(A, JobAssignment(j, M[mi], ml.load, ml.load + j.p))
         # Update the load
-        pq[mi] = MachineLoad(pq[mi].index, pq[mi].load + j.p)
+        pq[mi] = Scheduling.MachineLoad(pq[mi].index, pq[mi].load + j.p)
     end
 
     return Schedule(J, M, A)
