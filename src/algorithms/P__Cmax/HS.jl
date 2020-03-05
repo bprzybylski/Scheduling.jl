@@ -93,7 +93,7 @@ function P__Cmax_HS_DABIN(J::Vector{Job}, eps::Rational{Int})
     J_large = J[J_large_idx]
 
     # Compute the constants
-    s = Int(ceil(1//eps^2)) + ((numerator(eps) == 1) ? 1 : 0)
+    s = Int(ceil(1//eps^2))
     iv = (1 - eps)//s
 
     # Generate the array of length bounds; here, 1:1:s means [1,2,...,s]
