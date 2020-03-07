@@ -39,6 +39,13 @@ end
     Machines()
 
 Generates an empty vector of `Machine` elements.
+
+# Example
+```julia-repl
+julia> Machines()
+A set of 0 machine(s):
+
+```
 """
 function Machines()
     return Vector{Machine}()
@@ -48,6 +55,17 @@ end
     Machines(m::Int)
 
 Generates a set of `m` identical parallel machines, denoted by `P_1`, `P_2`, etc.
+
+# Example
+```julia-repl
+julia> Machines(4)
+A set of 4 machine(s):
+    Machine P_1
+    Machine P_2
+    Machine P_3
+    Machine P_4
+
+```
 """
 function Machines(m::Int)
     M = Machines()
@@ -67,6 +85,16 @@ end
     Machines(S::Array{Rational{Int}, 1})
 
 Generates a set of machines with speeds determined by the `S` array, denoted by `Q_1`, `Q_2`, etc.
+
+# Example
+```julia-repl
+julia> Machines([1, 1//2, 2])
+A set of 3 machine(s):
+    Machine Q_1
+    Machine Q_2:     [s = 1//2]
+    Machine Q_3:     [s = 2]
+
+```
 """
 function Machines(S::Array{Rational{Int}, 1})
     M = Machines()
@@ -89,5 +117,15 @@ end
     Machines(S::Array{Int, 1})
 
 Generates a set of machines with speeds determined by the `S` array, denoted by `Q_1`, `Q_2`, etc.
+
+# Example
+```julia-repl
+julia> Machines([1, 3, 2])
+A set of 3 machine(s):
+    Machine Q_1
+    Machine Q_2:     [s = 3]
+    Machine Q_3:     [s = 2]
+
+```
 """
 Machines(S::Array{Int, 1}) = Machines(Array{Rational{Int},1}(S))

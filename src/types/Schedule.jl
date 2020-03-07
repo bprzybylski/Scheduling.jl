@@ -190,6 +190,6 @@ function load(input_file::String = "Schedule.jld")
     jldopen(input_file, "r") do f
         S = f["S"]
     end
-    
+
     return S
 end

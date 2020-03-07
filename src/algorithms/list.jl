@@ -66,7 +66,7 @@ end
 """
     wspt(J::Vector{Job}, M::Vector{Machine}; copy = false)
 
-Schedules jobs in the order of their processing times to weight rations, starting with the lowest one. If `copy` is set to true, then the returned structure will refer to the copies of the input vectors.
+Schedules jobs in the order of their processing times to weight ratios, starting with the lowest one. If `copy` is set to true, then the returned structure will refer to the copies of the input vectors.
 """
 wspt(J::Vector{Job}, M::Vector{Machine}; copy = false) = spt(J, M; weighted = true, copy = copy)
 
@@ -90,6 +90,6 @@ end
 """
     wlpt(J::Vector{Job}, M::Vector{Machine}; copy = false)
 
-Schedules jobs in the order of their processing times to weight rations, starting with the highest one. If `copy` is set to true, then the returned structure will refer to the copies of the input vectors.
+Schedules jobs in the order of their processing times to weight ratios, starting with the highest one. If `copy` is set to true, then the returned structure will refer to the copies of the input vectors.
 """
 wlpt(J::Vector{Job}, M::Vector{Machine}; copy = false) = lpt(J, M; weighted = true, copy = copy)

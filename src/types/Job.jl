@@ -60,6 +60,13 @@ end
     Jobs()
 
 Generates an empty vector of `Job` elements.
+
+# Example
+```julia-repl
+julia> Jobs()
+A set of 0 job(s):
+
+```
 """
 function Jobs()
     return Vector{Job}()
@@ -69,6 +76,17 @@ end
     Jobs(n::Int)
 
 Generates a set of `n` identical unit jobs, denoted by `J_1`, `J_2`, etc.
+
+# Example
+```julia-repl
+julia> Jobs(4)
+A set of 4 job(s):
+    Job J_1:    [p = 1]
+    Job J_2:    [p = 1]
+    Job J_3:    [p = 1]
+    Job J_4:    [p = 1]
+
+```
 """
 function Jobs(n::Int)
     J = Jobs()
@@ -88,6 +106,17 @@ end
     Jobs(P::Array{Rational{Int}, 1})
 
 Generates a set of jobs with basic processing times determined by the `P` array, denoted by `J_1`, `J_2`, etc.
+
+# Example
+```julia-repl
+julia> Jobs([1//2, 3, 5//3, 7])
+A set of 4 job(s):
+    Job J_1:    [p = 1//2]
+    Job J_2:    [p = 3]
+    Job J_3:    [p = 5//3]
+    Job J_4:    [p = 7]
+
+```
 """
 function Jobs(P::Array{Rational{Int}, 1})
     J = Jobs()
@@ -110,5 +139,16 @@ end
     Jobs(P::Array{Int, 1})
 
 Generates a set of jobs with basic processing times determined by the `P` array, denoted by `J_1`, `J_2`, etc.
+
+# Example
+```julia-repl
+julia> Jobs([1, 5, 6, 2])
+A set of 4 job(s):
+    Job J_1:    [p = 1]
+    Job J_2:    [p = 5]
+    Job J_3:    [p = 6]
+    Job J_4:    [p = 2]
+
+```
 """
 Jobs(P::Array{Int, 1}) = Jobs(Array{Rational{Int},1}(P))
