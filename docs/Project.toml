@@ -1,0 +1,7 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+Scheduling = "3046eef8-5348-48c9-b840-6c15f76662f3"
+
+[compat]
+Documenter = "^0.23.0"
+Scheduling = "^0.1.0"
