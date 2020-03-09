@@ -1,6 +1,6 @@
 name = "Scheduling"
 uuid = "3046eef8-5348-48c9-b840-6c15f76662f3"
-authors = ["Bartek Przybylski <bap@amu.edu.pl>"]
+authors = ["Bartek Przybylski <bap@amu.edu.pl>", "Sascha Hunold <sascha@hunoldscience.net>"]
 version = "0.1.0"
 
 [deps]
