@@ -1,7 +1,7 @@
 name = "Scheduling"
 uuid = "3046eef8-5348-48c9-b840-6c15f76662f3"
 authors = ["Bartek Przybylski <bap@amu.edu.pl>", "Sascha Hunold <sascha@hunoldscience.net>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
