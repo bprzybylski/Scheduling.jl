@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Introduction · Scheduling.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link href="assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>Scheduling.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li class="current"><a class="toctext" href>Introduction</a><ul class="internal"><li><a class="toctext" href="#Features-1">Features</a></li><li><a class="toctext" href="#Installation-1">Installation</a></li><li><a class="toctext" href="#Quick-start-1">Quick start</a></li></ul></li><li><span class="toctext">Basics</span><ul><li><a class="toctext" href="scheduling_jobs/">Jobs</a></li><li><a class="toctext" href="scheduling_machines/">Machines</a></li><li><a class="toctext" href="scheduling_assignments/">Assignments</a></li><li><a class="toctext" href="scheduling_schedules/">Schedules</a></li><li><a class="toctext" href="scheduling_objectives/">Objective functions</a></li></ul></li><li><span class="toctext">Algorithms</span><ul><li><a class="toctext" href="algorithms_list/">List algorithms</a></li><li><a class="toctext" href="algorithms_P__Cmax/"><span>$\text{P}||\text{C}_\text{max}$</span></a></li></ul></li><li><a class="toctext" href="examples/">Examples</a></li></ul></nav><article id="docs"><header><nav><ul><li><a href>Introduction</a></li></ul><a class="edit-page" href="https://github.com/bprzybylski/Scheduling.jl/blob/master/docs/src/index.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Introduction</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Scheduling.jl-1" href="#Scheduling.jl-1">Scheduling.jl</a></h1><p><code>Scheduling.jl</code> is a pure Julia package that can be seen as a framework for scheduling research. It is maintained by Sascha Hunold (TU Wien) and Bartlomiej Przybylski (AMU Poznan).</p><h2><a class="nav-anchor" id="Features-1" href="#Features-1">Features</a></h2><p>As of version 0.1.1 the package provides a limited amount of functionalities.</p><h3><a class="nav-anchor" id="Scheduling-1" href="#Scheduling-1">Scheduling</a></h3><p><code>Scheduling</code> is a main module of the package. It provides:</p><ul><li>a set of structures for representing:<ul><li>fixed processing times jobs,</li><li>parallel machines,</li><li>schedules,</li></ul></li><li>functions for plotting a schedule and exporting it as a TeX file,</li><li>functions for saving a schedule into an HDF5 binary file and loading it back from such a file.</li></ul><h3><a class="nav-anchor" id="Scheduling.Objectives-1" href="#Scheduling.Objectives-1">Scheduling.Objectives</a></h3><p>The <code>Scheduling.Objectives</code> module provides a number of objective functions that can be used to estimate the quality of a schedule.</p><h3><a class="nav-anchor" id="Scheduling.Algorithms-1" href="#Scheduling.Algorithms-1">Scheduling.Algorithms</a></h3><p>This module provides a set of implementations of the scheduling algorithms. These algorithms may be used to transform a set of jobs and machines into a schedule based on exact, heuristic or approximation approach. The list of algorithms include the standard list algorithms like LPT, SPT, WLPT and WSPT.</p><p>Moreover, as of version 0.1.1, a few algorithms for the <span>$\text{P}||\text{C}_\text{max}$</span> problem are implemented:</p><ul><li>an exact algorithm based on the Integer Program,</li><li>an approximation algorithm by Hochbaum &amp; Shmoys,</li><li>an on-line MR algorithm for the same problem by Fleischer &amp; Wahl.</li></ul><h2><a class="nav-anchor" id="Installation-1" href="#Installation-1">Installation</a></h2><p>To use <code>Scheduling</code> we require Julia 1.0 or higher. Please see <a href="http://julialang.org/downloads/">http://julialang.org/downloads</a> for instructions on how to obtain Julia for your system. In order to install the <code>Scheduling</code> package, simply type:</p><pre><code class="language-julia-repl">julia&gt; using Pkg; Pkg.add(&quot;Scheduling&quot;)</code></pre><h2><a class="nav-anchor" id="Quick-start-1" href="#Quick-start-1">Quick start</a></h2><p>The following example shows how to use some of the functionalities provided by the <code>Scheduling.jl</code> package</p><pre><code class="language-julia">using Scheduling # We need the basic structures
+using Scheduling.Algorithms # We will use some predefined algorithms
+using Scheduling.Objectives # We will estimate the quality of the resulting schedules
+
+# Generate a set of jobs with processing times from an array
+J = Jobs([27, 19, 19, 4, 48, 38, 29, 21, 9, 22, 11, 27, 36, 34, 21, 7, 7, 28])
+# Generate a set of 4 identical machines
+M = Machines(4)
+
+# Generate an optimal schedule using IP
+OPT = Algorithms.P__Cmax_IP(J, M)
+# As all the numbers are rational and we expect the length
+# of the schedule to have integer time, we need to convert
+# the Cmax value
+println(&quot;Optimal schedule:     Cmax = $(Int(cmax(OPT)))&quot;)
+
+# Generate a schedule using LPT list rule
+LPT = Algorithms.lpt(J, M)
+println(&quot;LPT schedule:         Cmax = $(Int(cmax(LPT)))&quot;)
+
+# Generate a schedule using SPT list rule
+SPT = Algorithms.spt(J, M)
+println(&quot;SPT schedule:         Cmax = $(Int(cmax(SPT)))&quot;)
+
+# Generate a schedule using the Hochbaum-Shmoys algorithm
+HS = Algorithms.P__Cmax_HS(J, M, eps = 1//3)
+println(&quot;HS schedule:          Cmax = $(Int(cmax(HS)))&quot;)
+
+# Plot the optimal schedule
+Scheduling.plot(OPT)</code></pre><p>The output will be:</p><pre><code class="language-none">Optimal schedule:     Cmax = 102
+LPT schedule:         Cmax = 104
+SPT schedule:         Cmax = 125
+HS schedule:          Cmax = 125</code></pre><p>and then the optimal plot will be generated by the <code>PyPlot</code> package.</p><footer><hr/><a class="next" href="scheduling_jobs/"><span class="direction">Next</span><span class="title">Jobs</span></a></footer></article></body></html>
