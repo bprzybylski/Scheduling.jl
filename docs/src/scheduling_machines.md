@@ -11,11 +11,19 @@ julia> Machine("M")
 Machine M
 ```
 
-Machine parameters can be set when the machine is created. However, as `Machine` is an immutable struct, you are not able to change any of the parameters of an existing job. Below we present all the possible parameters together with their default values:
+Machine parameters can be set when the machine is created. However, as `Machine` is an immutable struct, you are not able to change any of the parameters of an existing job. The structure of the `Machine` struct is as follows:
 
 ```julia
 struct Machine
     name::String
+    params::MachineParams
+end
+```
+
+while the default params are generated based on the following struct.
+
+```julia
+struct ClassicalMachineParams <: MachineParams
     s::Rational{UInt}   # speed (default: 1)
 end
 ```
