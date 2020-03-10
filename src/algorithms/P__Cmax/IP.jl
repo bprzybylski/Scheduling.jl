@@ -1,23 +1,20 @@
 using JuMP, GLPK
 
 """
-    P__Cmax_IP(J::Vector{Job}, M::Vector{Machine}; optimizer = GLPK.Optimizer, copy = false)
+    P__Cmax_IP!(J::Vector{Job}, M::Vector{Machine}; optimizer = GLPK.Optimizer)
 
-Solves the P||Cmax problem by applying the simple IP proposed by Drozdowski (2009, p. 23). By default, the open source GLPK optimizer together with JuMP is used. If `copy` is set to true, then the returned structure will refer to the copies of the input vectors.
+Solves the P||Cmax problem by applying the simple IP proposed by Drozdowski (2009, p. 23). By default, the open source GLPK optimizer together with JuMP is used. This algorithm works on original `J` and `M` vectors which are also returned with the resulting schedule. In order to use copies, see `P__Cmax_IP`.
+
+This algorithm is based on the following job parameters: `p` (processing time).
 
 # References
 * M.Drozdowski, Scheduling for Parallel Processing, Springer-Verlag, London, 2009, ISBN: 978-1-84882-309-9.
 """
-function P__Cmax_IP(J::Vector{Job}, M::Vector{Machine}; optimizer = GLPK.Optimizer, copy = false)
-    if copy
-        J = Base.copy(J)
-        M = Base.copy(M)
-    end
-
+function P__Cmax_IP!(J::Vector{Job}, M::Vector{Machine}; optimizer = GLPK.Optimizer)
     # Find the lowest common multiple of all the denominators
-    J_lcm = lcm(map(X -> denominator(X.p) , J))
+    J_lcm = lcm(map(X -> denominator(X.params.p) , J))
     # Generate a set of processing times for normalized jobs
-    P = map(X -> X.p * J_lcm, J)
+    P = map(X -> X.params.p * J_lcm, J)
 
     # Set up the model
     model = Model(optimizer)
@@ -58,11 +55,22 @@ function P__Cmax_IP(J::Vector{Job}, M::Vector{Machine}; optimizer = GLPK.Optimiz
         load = Rational{UInt}(0)
         for i in 1:n
             if x[i,j] == 1
-                push!(A, JobAssignment(J[i], M[j], load, load + J[i].p))
-                load = load + J[i].p
+                push!(A, JobAssignment(J[i], M[j], load, load + J[i].params.p))
+                load = load + J[i].params.p
             end
         end
     end
 
     return Schedule(J, M, A)
+end
+
+"""
+    P__Cmax_IP(J::Vector{Job}, M::Vector{Machine}; optimizer = GLPK.Optimizer)
+
+The same as `P__Cmax_IP!`, but it copies the input vectors before the algorithm starts.
+"""
+function P__Cmax_IP(J::Vector{Job}, M::Vector{Machine}; optimizer = GLPK.Optimizer)
+    J = Base.copy(J)
+    M = Base.copy(M)
+    P__Cmax_IP!(J, M; optimizer = optimizer)
 end
