@@ -34,14 +34,12 @@ function TeX(S::Schedule, output_file::String = "Schedule.tex"; compile = false)
     open(file_path, "w") do f
         write(f, """%!TEX program=pdflatex
                 \\documentclass[crop,tikz]{standalone}
-                \\usetikzlibrary{arrows.meta}
 
                 \\begin{document}
                 \\def\\ux{0.5cm}\\def\\uy{-0.6cm}
                 \\begin{tikzpicture}
                 \\tikzset{x=\\ux,
                           y=\\uy,
-                          >=Latex,
                           burst/.style 2 args={draw,
                                                anchor=south west,
                                                minimum height=-\\uy,

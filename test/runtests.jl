@@ -5,29 +5,35 @@ using Scheduling, Scheduling.Objectives, Test
         # Test a job constructor
         J = Job("I love scheduling")
         @test typeof(J) == Job &&
-              J.p == 1 &&
+              typeof(J.params) == ClassicalJobParams &&
+              J.params.p == 1 &&
               J.name == "I love scheduling"
 
-        J = Job("I love scheduling", p = 3, w = 10, r = 2, d = 7, D = 8)
+        J = Job("I love scheduling",
+                ClassicalJobParams(p = 3, w = 10, r = 2, d = 7, D = 8))
         @test typeof(J) == Job &&
-              J.p == 3 &&
-              J.w == 10 &&
-              J.r == 2 &&
-              J.d == 7 &&
-              J.D == 8 &&
+              typeof(J.params) == ClassicalJobParams &&
+              J.params.p == 3 &&
+              J.params.w == 10 &&
+              J.params.r == 2 &&
+              J.params.d == 7 &&
+              J.params.D == 8 &&
               J.name == "I love scheduling"
 
-        J = Job("I love scheduling", p = 3//2, w = 10//3, r = 2//3, d = 7//2, D = 8//2)
+        J = Job("I love scheduling",
+                ClassicalJobParams(p = 3//2, w = 10//3, r = 2//3, d = 7//2, D = 8//2))
         @test typeof(J) == Job &&
-             J.p == 3//2 &&
-             J.w == 10//3 &&
-             J.r == 2//3 &&
-             J.d == 7//2 &&
-             J.D == 8//2 &&
-             J.name == "I love scheduling"
+              typeof(J.params) == ClassicalJobParams &&
+              J.params.p == 3//2 &&
+              J.params.w == 10//3 &&
+              J.params.r == 2//3 &&
+              J.params.d == 7//2 &&
+              J.params.D == 8//2 &&
+              J.name == "I love scheduling"
 
         # The following tests whether an exception is thrown if r + p > D
-        @test_throws Exception Job("J", r = 5, p = 100, D = 104)
+        @test_throws Exception Job("J",
+                     ClassicalJobParams(r = 5, p = 100, D = 104))
     end
 
     @testset "Jobs" begin
@@ -39,21 +45,24 @@ using Scheduling, Scheduling.Objectives, Test
         J = Jobs(100)
         @test typeof(J) == Vector{Job} &&
               length(J) == 100 &&
-              all(job.p == 1 for job in J)
+              all(typeof(job.params) == ClassicalJobParams for job in J) &&
+              all(job.params.p == 1 for job in J)
 
          # Test a constructor for an array of integers
          A = [1, 5, 2, 3, 4, 1, 7, 8, 12, 18, 7, 3]
          J = Jobs(A)
          @test typeof(J) == Vector{Job} &&
                length(J) == 12 &&
-               all(J[i].p == A[i] for i in 1:length(J))
+               all(typeof(job.params) == ClassicalJobParams for job in J) &&
+               all(J[i].params.p == A[i] for i in 1:length(J))
 
          # Test a constructor for an array of rationals
          A = [1//2, 5//2, 2//3, 3//4, 4//1, 1//6, 7//9, 8//12, 12//6, 18//3, 7//4, 3//2]
          J = Jobs(A)
          @test typeof(J) == Vector{Job} &&
                length(J) == 12 &&
-               all(J[i].p == A[i] for i in 1:length(J))
+               all(typeof(job.params) == ClassicalJobParams for job in J) &&
+               all(J[i].params.p == A[i] for i in 1:length(J))
 
          # The following test whether an exception is thrown if p < 0
          @test_throws Exception Jobs([1, 2, -1])
@@ -64,21 +73,24 @@ using Scheduling, Scheduling.Objectives, Test
         # Test a machine constructor
         M = Machine("I love scheduling")
         @test typeof(M) == Machine &&
-              M.s == 1 &&
+              typeof(M.params) == ClassicalMachineParams &&
+              M.params.s == 1 &&
               M.name == "I love scheduling"
 
-        M = Machine("I love scheduling", s = 3)
+        M = Machine("I love scheduling", ClassicalMachineParams(s = 3))
         @test typeof(M) == Machine &&
-              M.s == 3 &&
+              typeof(M.params) == ClassicalMachineParams &&
+              M.params.s == 3 &&
               M.name == "I love scheduling"
 
-        M = Machine("I love scheduling", s = 3//2)
+        M = Machine("I love scheduling", ClassicalMachineParams(s = 3//2))
         @test typeof(M) == Machine &&
-              M.s == 3//2 &&
+              typeof(M.params) == ClassicalMachineParams &&
+              M.params.s == 3//2 &&
               M.name == "I love scheduling"
 
         # The following tests whether an exception is thrown if s < 0
-        @test_throws Exception Machine("M", s = -1)
+        @test_throws Exception Machine("M", ClassicalMachineParams(s = -1))
     end
 
     @testset "Machines" begin
@@ -90,21 +102,24 @@ using Scheduling, Scheduling.Objectives, Test
         M = Machines(100)
         @test typeof(M) == Vector{Machine} &&
               length(M) == 100 &&
-              all(machine.s == 1 for machine in M)
+              all(typeof(m.params) == ClassicalMachineParams for m in M) &&
+              all(machine.params.s == 1 for machine in M)
 
          # Test a constructor for an array of integers
          A = [1, 5, 2, 3, 4, 1, 7, 8, 12, 18, 7, 3]
          M = Machines(A)
          @test typeof(M) == Vector{Machine} &&
                length(M) == 12 &&
-               all(M[i].s == A[i] for i in 1:length(M))
+               all(typeof(m.params) == ClassicalMachineParams for m in M) &&
+               all(M[i].params.s == A[i] for i in 1:length(M))
 
          # Test a constructor for an array of rationals
          A = [1//2, 5//2, 2//3, 3//4, 4//1, 1//6, 7//9, 8//12, 12//6, 18//3, 7//4, 3//2]
          M = Machines(A)
          @test typeof(M) == Vector{Machine} &&
                length(M) == 12 &&
-               all(M[i].s == A[i] for i in 1:length(M))
+               all(typeof(m.params) == ClassicalMachineParams for m in M) &&
+               all(M[i].params.s == A[i] for i in 1:length(M))
 
          # The following test whether an exception is thrown if s < 0
          @test_throws Exception Machines([1, 2, -1])
@@ -170,13 +185,13 @@ end
 @testset "Objectives" begin
       # Create a set of jobs
       J = Jobs()
-      push!(J, Job("J", p = 7, d = 6, w = 2))
-      push!(J, Job("J", p = 2, d = 4))
-      push!(J, Job("J", p = 4, d = 1000, w = -1))
-      push!(J, Job("J", p = 8, d = 1273//3))
-      push!(J, Job("J", p = 3, w = 3))
-      push!(J, Job("J", p = 4, w = 6))
-      push!(J, Job("J", p = 8, w = -4//3))
+      push!(J, Job("J", ClassicalJobParams(p = 7, d = 6, w = 2)))
+      push!(J, Job("J", ClassicalJobParams(p = 2, d = 4)))
+      push!(J, Job("J", ClassicalJobParams(p = 4, d = 1000, w = -1)))
+      push!(J, Job("J", ClassicalJobParams(p = 8, d = 1273//3)))
+      push!(J, Job("J", ClassicalJobParams(p = 3, w = 3)))
+      push!(J, Job("J", ClassicalJobParams(p = 4, w = 6)))
+      push!(J, Job("J", ClassicalJobParams(p = 8, w = -4//3)))
 
       # Create a set of machines
       M = Machines(3)

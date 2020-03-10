@@ -12,7 +12,7 @@ function csum(S::Schedule; weighted = false)
     for J in S.jobs
         X = filter(A -> A.J === J, S.assignments)
         if length(X) > 0
-            push!(C, maximum(A -> Rational{Int}(A.C), X)*(weighted ? J.w : 1))
+            push!(C, maximum(A -> Rational{Int}(A.C), X)*(weighted ? J.params.w : 1))
         end
     end
     if length(C) == 0

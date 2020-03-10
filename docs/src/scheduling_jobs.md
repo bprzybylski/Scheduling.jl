@@ -11,11 +11,19 @@ julia> Job("J")
 Job J:  [p = 1]
 ```
 
-As you can see, the default processing time of a job is equal to 1. Of course, job parameters can be set when the job is created. However, as `Job` is an immutable struct, you are not able to change any of the parameters of an existing job. Below we present all the possible parameters together with their default values:
+As you can see, the default processing time of a job is equal to 1. Of course, job parameters can be set when the job is created. However, as `Job` is an immutable struct, you are not able to change any of the parameters of an existing job. The structure of the `Job` struct is as follows:
 
 ```julia
 struct Job
     name::String
+    params::JobParams
+end
+```
+
+while the default params are generated based on the following struct.
+
+```julia
+struct ClassicalJobParams <: JobParams
     p::Rational{UInt}     # basic processing time (default: 1)
     w::Rational{Int}      # weight (default: 1)
     r::Rational{UInt}     # ready time (default: 0)
@@ -27,7 +35,7 @@ end
 It is forbidden to create a job for which `r + p > D`.
 
 ```julia-repl
-julia> Job("J", p = 13//2, r = 7//3, d = -3//7)
+julia> Job("J", ClassicalJobParams(p = 13//2, r = 7//3, d = -3//7))
 Job J:  [p = 13//2, r = 7//3, d = -3//7]
 ```
 

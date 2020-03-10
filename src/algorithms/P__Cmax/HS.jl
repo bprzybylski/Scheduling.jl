@@ -88,7 +88,7 @@ function P__Cmax_HS_DABIN(J::Vector{Job}, eps::Rational{Int})
     ########################################
 
     # Find all the jobs that have processing times higher that eps
-    J_large_idx = findall(X -> X.p > eps, J)
+    J_large_idx = findall(X -> X.params.p > eps, J)
     # Extract the jobs with high processing times
     J_large = J[J_large_idx]
 
@@ -107,7 +107,7 @@ function P__Cmax_HS_DABIN(J::Vector{Job}, eps::Rational{Int})
     # For each job in the set of large jobs
     for i in 1:length(J_large)
         # Find the first lower bound good for a big job
-        idx = findfirst(x -> (J_large[i].p <= x), lbounds)
+        idx = findfirst(x -> (J_large[i].params.p <= x), lbounds)
         # Increment the corresponding value of b
         b[idx] += 1
         # If no indices have been assigned to bounds2idx,
@@ -166,7 +166,7 @@ function P__Cmax_HS_DABIN(J::Vector{Job}, eps::Rational{Int})
     ########################################
 
     # Find all the jobs that have processing times lower that eps
-    J_small_idx = findall(X -> X.p <= eps, J)
+    J_small_idx = findall(X -> X.params.p <= eps, J)
     # Extract the jobs with low processing times
     J_small = J[J_small_idx]
 
@@ -185,7 +185,7 @@ function P__Cmax_HS_DABIN(J::Vector{Job}, eps::Rational{Int})
             no_of_bins += 1
         end
 
-        bin_packing[bin_idx].load += J_small[i].p
+        bin_packing[bin_idx].load += J_small[i].params.p
         push!(bin_packing[bin_idx].assignments, J_small_idx[i])
     end
 
@@ -193,19 +193,16 @@ function P__Cmax_HS_DABIN(J::Vector{Job}, eps::Rational{Int})
 end
 
 """
-    P__Cmax_HS(J::Vector{Job}, M::Vector{Machine}; eps = 1//10, copy = false, verbose = false)
+    P__Cmax_HS!(J::Vector{Job}, M::Vector{Machine}; eps = 1//10, verbose = false)
 
-Finds an approximation solution of the P||Cmax problem based on the algorithms proposed by Hochbaum and Shmoys (1987). If `copy` is set to true, then the returned structure will refer to the copies of the input vectors.
+Finds an approximation solution of the P||Cmax problem based on the algorithms proposed by Hochbaum and Shmoys (1987). This algorithm works on original `J` and `M` vectors which are also returned with the resulting schedule. In order to use copies, see `P__Cmax_HS`.
+
+This algorithm is based on the following job parameters: `p` (processing time).
 
 # References
 * D.S. Hochbaum and D.B. Shmoys, Using dual approximation algorithms for scheduling problems theoretical and practical results, Journal of the ACM, 34(1):144–162 (1987), doi: 10.1145/7531.7535
 """
-function P__Cmax_HS(J::Vector{Job}, M::Vector{Machine}; eps = 1//10, copy = false, verbose = false)
-    if copy
-        J = Base.copy(J)
-        M = Base.copy(M)
-    end
-
+function P__Cmax_HS!(J::Vector{Job}, M::Vector{Machine}; eps = 1//10, verbose = false)
     # Generate an empty job assignments list
     A = JobAssignments()
 
@@ -215,7 +212,7 @@ function P__Cmax_HS(J::Vector{Job}, M::Vector{Machine}; eps = 1//10, copy = fals
     m = length(M)
 
     # Set the lower and the upper bound on the cmax
-    cmax_lb = max(sum(X -> X.p, J) // m, maximum(X -> X.p, J))
+    cmax_lb = max(sum(X -> X.params.p, J) // m, maximum(X -> X.params.p, J))
     cmax_ub = 2*cmax_lb
 
     if verbose
@@ -234,7 +231,7 @@ function P__Cmax_HS(J::Vector{Job}, M::Vector{Machine}; eps = 1//10, copy = fals
         end
 
         # Scale all the job processing times
-        JC = map(X -> Job(X.name; p = X.p//d), J)
+        JC = map(X -> Job(X.name, ClassicalJobParams(p = X.params.p//d)), J)
         # Perform a dual approximation for bin packing
         bins, bin_packing = P__Cmax_HS_DABIN(JC, eps)
 
@@ -260,12 +257,23 @@ function P__Cmax_HS(J::Vector{Job}, M::Vector{Machine}; eps = 1//10, copy = fals
             # For every assignment of a job to a bin
             for j in best_bin_packing[i].assignments
                 # Generate the JobAssignment
-                push!(A, JobAssignment(J[j], M[i], load, load + J[j].p))
+                push!(A, JobAssignment(J[j], M[i], load, load + J[j].params.p))
                 # Increase the load
-                load = load + J[j].p
+                load = load + J[j].params.p
             end
         end
     end
 
     return Schedule(J, M, A)
+end
+
+"""
+    P__Cmax_HS(J::Vector{Job}, M::Vector{Machine}; eps = 1//10, verbose = false)
+
+The same as `P__Cmax_HS!`, but it copies the input vectors before the algorithm starts.
+"""
+function P__Cmax_HS(J::Vector{Job}, M::Vector{Machine}; eps = 1//10, verbose = false)
+    J = Base.copy(J)
+    M = Base.copy(M)
+    P__Cmax_HS!(J, M; eps = eps, verbose = verbose)
 end

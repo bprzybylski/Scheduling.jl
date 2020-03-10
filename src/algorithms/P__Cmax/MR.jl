@@ -1,17 +1,14 @@
 """
-    P__Cmax_MR(J::Vector{Job}, M::Vector{Machine}; copy = false)
+    P__Cmax_MR!(J::Vector{Job}, M::Vector{Machine})
 
-An approximation approach to the online version of the P||Cmax problem proposed by Fleischer and Wahl (2000, p. 345). If `copy` is set to true, then the returned structure will refer to the copies of the input vectors.
+An approximation approach to the online version of the P||Cmax problem proposed by Fleischer and Wahl (2000, p. 345). This algorithm works on original `J` and `M` vectors which are also returned with the resulting schedule. In order to use copies, see `P__Cmax_MR`.
+
+This algorithm is based on the following job parameters: `p` (processing time).
 
 # References
 * R. Fleischer and M. Wahl, On-line scheduling revisited, Journal of Scheduling, 3:343–353 (2000), doi: 10.1002/1099-1425(200011/12)3:6<343::AID-JOS54>3.0.CO;2-2
 """
-function P__Cmax_MR(J::Vector{Job}, M::Vector{Machine}; copy = false)
-    if copy
-        J = Base.copy(J)
-        M = Base.copy(M)
-    end
-
+function P__Cmax_MR!(J::Vector{Job}, M::Vector{Machine})
     # Generate an empty job assignments list
     A = JobAssignments()
 
@@ -41,12 +38,12 @@ function P__Cmax_MR(J::Vector{Job}, M::Vector{Machine}; copy = false)
     # Schedule jobs one at a time
     for i in 1:n
         # Select a machine
-        if !flat() || J[i].p + ml[mr_I].load > mr_C * sum(j -> j.p, J) / m
-            push!(A, JobAssignment(J[i], M[ml[m].index], ml[m].load, ml[m].load + J[i].p))
-            ml[m].load = ml[m].load + J[i].p
+        if !flat() || J[i].params.p + ml[mr_I].load > mr_C * sum(j -> j.params.p, J) / m
+            push!(A, JobAssignment(J[i], M[ml[m].index], ml[m].load, ml[m].load + J[i].params.p))
+            ml[m].load = ml[m].load + J[i].params.p
         else
-            push!(A, JobAssignment(J[i], M[ml[mr_I].index], ml[mr_I].load, ml[mr_I].load + J[i].p))
-            ml[mr_I].load = ml[mr_I].load + J[i].p
+            push!(A, JobAssignment(J[i], M[ml[mr_I].index], ml[mr_I].load, ml[mr_I].load + J[i].params.p))
+            ml[mr_I].load = ml[mr_I].load + J[i].params.p
         end
 
         # Make sure that the ml vector is sorted after the change
@@ -54,4 +51,15 @@ function P__Cmax_MR(J::Vector{Job}, M::Vector{Machine}; copy = false)
     end
 
     return Schedule(J, M, A)
+end
+
+"""
+    P__Cmax_MR(J::Vector{Job}, M::Vector{Machine})
+
+The same as `P__Cmax_MR!`, but it copies the input vectors before the algorithm starts.
+"""
+function P__Cmax_MR(J::Vector{Job}, M::Vector{Machine})
+    J = Base.copy(J)
+    M = Base.copy(M)
+    P__Cmax_MR!(J, M)
 end
