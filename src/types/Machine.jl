@@ -1,44 +1,71 @@
-export Machine, Machines
+export Machine, Machines, MachineParams, ClassicalMachineParams
+
+abstract type MachineParams end
+
+##########################
+# ClassicalMachineParams #
+##########################
+
+struct ClassicalMachineParams <: MachineParams
+    s::Rational{UInt}   # speed
+    function ClassicalMachineParams(;s = 1)
+        return new(s)
+    end
+end
+
+###########
+# Machine #
+###########
 
 struct Machine
     name::String
-    s::Rational{UInt}   # speed
-    function Machine(name::String; s = 1)
-        return new(name, s)
+    params::MachineParams
+    function Machine(name::String, params = ClassicalMachineParams())
+        return new(name, params)
     end
 end
 
 function Base.show(io::IO, M::Machine)
-    function rtos(r::Rational)
-        if r == Inf
-            return "∞"
-        elseif denominator(r) == 1
-            return string(numerator(r))
+    if typeof(M.params) == ClassicalMachineParams
+        function rtos(r::Rational)
+            if r == Inf
+                return "∞"
+            elseif denominator(r) == 1
+                return string(numerator(r))
+            end
+            return string(numerator(r), "//", denominator(r))
         end
-        return string(numerator(r), "//", denominator(r))
-    end
 
-    print(io, "Machine ")
-    printstyled(io, "$(M.name)"; bold = true, color = :light_yellow)
-    if M.s != 1
-        print(io, ":\t [s = ")
-        printstyled(io, "$(rtos(M.s))"; bold = true, color = :magenta)
-        print(io, "]")
+        print(io, "Machine ")
+        printstyled(io, "$(M.name)"; bold = true, color = :light_yellow)
+        if M.params.s != 1
+            print(io, ":\t [s = ")
+            printstyled(io, "$(rtos(M.params.s))"; bold = true, color = :magenta)
+            print(io, "]")
+        end
+    else
+        print(io, "Machine ")
+        printstyled(io, "$(M.name)"; bold = true, color = :light_yellow)
+        print(io, "[$(typeof(M.params))]")
     end
 end
 
 function Base.show(io::IO, ::MIME"text/plain", S::Vector{Machine})
-    print("A set of $(size(S)[1]) machine(s):")
+    print("A set of $(length(S)) machine(s):")
     for M in S
         print(io, "\n\t")
         show(io, M)
     end
 end
 
+##############
+# Generators #
+##############
+
 """
     Machines()
 
-Generates an empty vector of `Machine` elements.
+Generates an empty vector of `Machine{ClassicalMachineParams}` elements.
 
 # Example
 ```julia-repl
@@ -104,9 +131,9 @@ function Machines(S::Array{Rational{Int}, 1})
             error("Machine $i cannot have a non-positive speed.")
         end
         if i < 10
-            push!(M, Machine("Q_$i", s = S[i]))
+            push!(M, Machine("Q_$i", ClassicalMachineParams(s = S[i])))
         else
-            push!(M, Machine("Q_{$i}", s = S[i]))
+            push!(M, Machine("Q_{$i}", ClassicalMachineParams(s = S[i])))
         end
     end
 
