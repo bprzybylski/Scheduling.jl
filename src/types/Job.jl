@@ -20,6 +20,18 @@ struct ClassicalJobParams <: JobParams
     end
 end
 
+######################
+# ParallelJobParams
+######################
+
+struct ParallelJobParams <: JobParams
+    p::Array{Float64,1}     # processing times        
+    function ParallelJobParams(;p=[1.0])
+        return new(p)
+    end
+end
+
+
 #######
 # Job #
 #######
@@ -28,6 +40,9 @@ struct Job
     name::String
     params::JobParams
     function Job(name::String, params = ClassicalJobParams())
+        return new(name, params)
+    end
+    function Job(name::String, params::ParallelJobParams)
         return new(name, params)
     end
 end

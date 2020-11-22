@@ -1,3 +1,5 @@
+export P__Cmax_HS, P__Cmax_HS!
+
 mutable struct P__Cmax_HS_BinConfig
     load::Rational{Int}
     assignments::Array{Int}

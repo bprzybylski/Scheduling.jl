@@ -20,6 +20,7 @@ include("algorithms/list.jl")
 include("algorithms/P__Cmax/IP.jl")
 include("algorithms/P__Cmax/MR.jl")
 include("algorithms/P__Cmax/HS.jl")
+include("algorithms/P_any_Cmax/MRT.jl")
 end
 
 end # module
