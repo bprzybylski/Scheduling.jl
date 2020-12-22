@@ -7,13 +7,21 @@ using Scheduling, Scheduling.Algorithms, Scheduling.Objectives
 Random.seed!(5)
 
 n = 25
-m = 10 
-p = gen_instance_prasanna_musicus(n, m) 
+#m = 10 
+m = 15
+jobs = gen_instance_prasanna_musicus(n, m) 
+machines = Machines(m)
 
-makespan, sched = Algorithms.MRT(n, m, p)
+sched = Algorithms.MRT(jobs, machines)
 
 println("\n-------")
 println("m=$(m)")
 println("n=$(n)")
+
+mrt_cmax = cmax(sched)
+
+println(sched)
 #println("p=$(p)")
-println("makespan: $(makespan)")
+println("makespan: $(mrt_cmax)")
+
+Scheduling.plot(sched)

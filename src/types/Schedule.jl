@@ -113,7 +113,7 @@ function plot(S::Schedule; animate = false, sizex = 800, sizey = 500, output_fil
     # Find the length of a schedule
     cmax = 0
     if length(S.assignments) > 0
-        cmax = maximum(A->A.C, S.assignments)
+        cmax = maximum(A->A.P.C, S.assignments)
     end
 
     rectangle(w::Float64, h::Int64, x::Float64, y::Int64) =
@@ -137,19 +137,36 @@ function plot(S::Schedule; animate = false, sizex = 800, sizey = 500, output_fil
     end
 
     for A in S.assignments
-        x = float(A.S)
-        y = findfirst(x->x==A.M, S.machines) - 1
-        w = float(A.C-A.S)
-        h = 1
+        x = float(A.P.S)
+
+        if  typeof(A.P) == ClassicalJobParams
+            y = findfirst(x->x==A.P.M, S.machines) - 1
+            w = float(A.P.C-A.P.S)
+            h = 1
+        else
+            # there must be at least one machine
+            println(A.J)
+            println(A.P)
+            nmach = length(A.P.M)
+            first_mach = A.P.M[1]
+            last_mach = last(A.P.M)
+            println(first_mach.name * " : " * last_mach.name)
+
+            y = findfirst(x->x==first_mach, S.machines) - 1
+            w = float(A.P.C-A.P.S)
+            h = findfirst(x->x==last_mach, S.machines) - findfirst(x->x==first_mach, S.machines) + 1
+            println(y, " ", w, " ", h)
+        end
 
         Plots.plot!(rectangle(w, h, x, y))
         Plots.annotate!([(x+w/2, y+h/2,
-                         Plots.text(A.J.name, :center, 14, "Courier New"))])
+                        Plots.text(A.J.name, :center, 14, "Courier New"))])
 
         if animate
             Plots.frame(anim)
         end
     end
+
 
     if animate
         Plots.gif(anim, output_file, fps = fps)

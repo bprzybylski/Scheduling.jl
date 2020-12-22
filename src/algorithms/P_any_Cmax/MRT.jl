@@ -27,36 +27,37 @@ mutable struct MRTMachineLoad
     start_time::Float64
 end
 
-function get_canonical_nb_procs_and_ptime(p::Array{Float64}, m::Int64, time_bound::Float64)
+function get_canonical_nb_procs_and_ptime(job::Job, m::Int64, time_bound::Float64)
     nb_procs = -1
     ptime    = 0
     for i in 1:m
-        if p[i] <= time_bound
+        if job.params.p[i] <= time_bound
             nb_procs = i
-            ptime    = p[i]
+            ptime    = job.params.p[i]
             break
         end
     end
     nb_procs, ptime
 end
 
-function get_lower_bound(n::Int64, m::Int64, p::Array{Float64})
+function get_lower_bound(n::Int64, m::Int64, jobs::Array{Job})
     psum = 0.0
     for i in 1:n
-        psum += p[i,1]
+        psum += jobs[i].params.p[1]
     end
     psum/m
 end
 
-function get_upper_bound(n::Int64, m::Int64, p::Array{Float64})
+function get_upper_bound(n::Int64, m::Int64, jobs::Array{Job})
     psum = 0.0
     for i in 1:n
-        psum += p[i,1]
+        psum += jobs[i].params.p[1]
+        #psum += p[i,1]
     end
     psum
 end
 
-function solve_knapsack(n::Int64, m::Int64, p::Array{Float64}, d::Float64, can_nb_d::Array{Int64}, can_nb_d2::Array{Int64}, can_work_d::Array{Float64}, can_work_d2::Array{Float64})
+function solve_knapsack(n::Int64, m::Int64, jobs::Array{Job}, d::Float64, can_nb_d::Array{Int64}, can_nb_d2::Array{Int64}, can_work_d::Array{Float64}, can_work_d2::Array{Float64})
     
     mod = Model(GLPK.Optimizer)
     #set_optimizer_attribute(mod, "OutputFlag", 0)
@@ -98,7 +99,7 @@ function solve_knapsack(n::Int64, m::Int64, p::Array{Float64}, d::Float64, can_n
     end
 end
 
-function try_reducing_procs_of_tasks_in_s1(m::Int64, d::Float64, a_set_0::Array{Tuple{MRTAllotment,MRTAllotment}}, a_set_1::Array{MRTAllotment}, a_set_2::Array{MRTAllotment}, p::Array{Float64})
+function try_reducing_procs_of_tasks_in_s1(m::Int64, d::Float64, a_set_0::Array{Tuple{MRTAllotment,MRTAllotment}}, a_set_1::Array{MRTAllotment}, a_set_2::Array{MRTAllotment}, jobs::Array{Job})
     changed = false
     
     remove_procs_task_idx = -1
@@ -114,7 +115,7 @@ function try_reducing_procs_of_tasks_in_s1(m::Int64, d::Float64, a_set_0::Array{
         old_allot    = a_set_1[remove_procs_task_idx]
         task_id      = old_allot.task_id
         new_nb_procs = old_allot.nb_procs-1
-        new_ptime    = p[task_id,new_nb_procs] 
+        new_ptime    = jobs[task_id].params.p[new_nb_procs] 
         
         
         tup = ( MRTAllotment(task_id, new_nb_procs, new_ptime), MRTAllotment(-1,-1,0.0) )
@@ -156,7 +157,7 @@ function try_stacking_tasks_from_s1(m::Int64, d::Float64, a_set_0::Array{Tuple{M
     changed, a_set_0, a_set_1, a_set_2
 end
 
-function try_moving_tasks_from_s2_to_s1(m::Int64, d::Float64, a_set_0::Array{Tuple{MRTAllotment,MRTAllotment}}, a_set_1::Array{MRTAllotment}, a_set_2::Array{MRTAllotment}, p::Array{Float64})
+function try_moving_tasks_from_s2_to_s1(m::Int64, d::Float64, a_set_0::Array{Tuple{MRTAllotment,MRTAllotment}}, a_set_1::Array{MRTAllotment}, a_set_2::Array{MRTAllotment}, jobs::Array{Job})
     changed = false
     
     # find empty processors in S1
@@ -183,7 +184,7 @@ function try_moving_tasks_from_s2_to_s1(m::Int64, d::Float64, a_set_0::Array{Tup
     
     if procs_free_s1 > 0        
         for i in 1:length(a_set_2)
-            nb_procs, ptime = get_canonical_nb_procs_and_ptime(p[a_set_2[i].task_id,:], procs_free_s1, 3/2*d)
+            nb_procs, ptime = get_canonical_nb_procs_and_ptime(jobs[a_set_2[i].task_id], procs_free_s1, 3/2*d)
             if nb_procs >= 1 && nb_procs <= procs_free_s1
                 allot = a_set_2[i]
                 new_allot= MRTAllotment(allot.task_id, nb_procs, ptime)
@@ -241,12 +242,15 @@ function is_feasible(m::Int64, d::Float64, a_set_0::Array{Tuple{MRTAllotment,MRT
     feasible
 end
 
-function MRT(n::Int64, m::Int64, p::Array{Float64})
-    schedule = Array{Allotment,1}()
+function MRT(jobs::Array{Job}, M::Vector{Machine})::Schedule
+    #schedule = Array{Allotment,1}()
     makespan = 0.0
+
+    n::Int64 = length(jobs)
+    m::Int64 = length(M)
     
-    upper_bound = get_upper_bound(n, m, p)
-    lower_bound = get_lower_bound(n, m, p)
+    upper_bound = get_upper_bound(n, m, jobs)
+    lower_bound = get_lower_bound(n, m, jobs)
     println("bounds $(lower_bound) $(upper_bound)")
 
     
@@ -261,17 +265,19 @@ function MRT(n::Int64, m::Int64, p::Array{Float64})
         println("current d: $(d)")
 
         # these are all tasks smaller than d/2 with p[1]
-        set_small = findall( x -> x <= d/2, p[:,1] )
+        set_small = findall( x -> x.params.p[1] <= d/2, jobs )
         # these are all tasks larger than d/2 with p[1]
-        set_t = findall( x -> x > d/2, p[:,1] )
+        set_t = findall( x -> x.params.p[1] > d/2, jobs )
         println("set_t: $(set_t)")
         
         println("set_small: $(set_small)")
-        Ws = sum(p[set_small,1])
+        #Ws = sum(p[set_small,1])
+        Ws = mapreduce(x -> x.params.p[1], +, jobs[set_small])
         println("Ws: $(Ws)")
         
-        p_t = p[set_t,:]
-        #println("p_t: $(p_t)")
+        #p_t = p[set_t,:]
+        p_t = jobs[set_t]
+        println("p_t: $(p_t)")
         n_t = length(set_t)
         
         can_nb_d  = Array{Int64}(undef, n_t)
@@ -286,7 +292,7 @@ function MRT(n::Int64, m::Int64, p::Array{Float64})
         # force_in_set_1_indexes = Array{Int64,1}()
         # force_in_set_1_nb_procs = 0
         for i in 1:n_t
-            pi = p_t[i,:]
+            pi = p_t[i]
     #        println("pi", pi)
             nprocs, ptime = get_canonical_nb_procs_and_ptime(pi, m, d)
             can_nb_d[i] = nprocs
@@ -367,15 +373,16 @@ function MRT(n::Int64, m::Int64, p::Array{Float64})
         a_set_0 = Array{Tuple{MRTAllotment,MRTAllotment},1}()
         a_set_1 = Array{MRTAllotment,1}()
         a_set_2 = Array{MRTAllotment,1}()
+        jobass = Vector{JobAssignment}()
         
         # fill sets S1 (bound d) and S2 (bound d/2)
         for i in 1:length(sol_set_1)
-            nb_procs, ptime = get_canonical_nb_procs_and_ptime(p[sol_set_1[i],:], m, sol_d)
+            nb_procs, ptime = get_canonical_nb_procs_and_ptime(jobs[sol_set_1[i]], m, sol_d)
             allot = MRTAllotment(sol_set_1[i], nb_procs, ptime)
             push!(a_set_1, allot)
         end
         for i in 1:length(sol_set_2)
-            nb_procs, ptime = get_canonical_nb_procs_and_ptime(p[sol_set_2[i],:], m, sol_d/2)
+            nb_procs, ptime = get_canonical_nb_procs_and_ptime(jobs[sol_set_2[i]], m, sol_d/2)
             allot = MRTAllotment(sol_set_2[i], nb_procs, ptime)
             push!(a_set_2, allot)
         end
@@ -389,9 +396,9 @@ function MRT(n::Int64, m::Int64, p::Array{Float64})
             
             @warn "schedule infeasible"
             
-            transformed, a_set_0, a_set_1, a_set_2 = try_reducing_procs_of_tasks_in_s1(m, sol_d, a_set_0, a_set_1, a_set_2, p)
+            transformed, a_set_0, a_set_1, a_set_2 = try_reducing_procs_of_tasks_in_s1(m, sol_d, a_set_0, a_set_1, a_set_2, jobs)
             transformed, a_set_0, a_set_1, a_set_2 = try_stacking_tasks_from_s1(m, sol_d, a_set_0, a_set_1, a_set_2)
-            transformed, a_set_0, a_set_1, a_set_2 = try_moving_tasks_from_s2_to_s1(m, sol_d, a_set_0, a_set_1, a_set_2, p)
+            transformed, a_set_0, a_set_1, a_set_2 = try_moving_tasks_from_s2_to_s1(m, sol_d, a_set_0, a_set_1, a_set_2, jobs)
                 
             # this is only for debugging purposes            
             test_cnt += 1
@@ -413,18 +420,35 @@ function MRT(n::Int64, m::Int64, p::Array{Float64})
         
         for i in 1:length(a_set_0)
             tup = a_set_0[i]
-            allot = Allotment(tup[1].task_id, 0.0, tup[1].ptime, starting_machine_s0, tup[1].nb_procs)
-            push!(schedule, allot)
+
+            #allot = Allotment(tup[1].task_id, 0.0, tup[1].ptime, starting_machine_s0, tup[1].nb_procs)
+            #push!(schedule, allot)
+
+            joba = JobAssignment( jobs[tup[1].task_id],  
+                M[starting_machine_s0:starting_machine_s0+tup[1].nb_procs-1],
+                0.0,
+                tup[1].ptime                    
+            )
+            push!(jobass, joba)
             
             for j in 1:(tup[1].nb_procs)
                 machine_load[starting_machine_s0+j-1].load       += tup[1].ptime
                 machine_load[starting_machine_s0+j-1].start_time  = tup[1].ptime
             end
             if tup[2].task_id != -1
+
                 # we stack here on top of task from tup[1]
-                allot = Allotment(tup[2].task_id, tup[1].ptime, tup[2].ptime, starting_machine_s0, tup[2].nb_procs)
-                push!(schedule, allot)
+                #allot = Allotment(tup[2].task_id, tup[1].ptime, tup[2].ptime, starting_machine_s0, tup[2].nb_procs)
+                #push!(schedule, allot)
                 
+                joba = JobAssignment( jobs[tup[2].task_id],  
+                    M[starting_machine_s0:starting_machine_s0+tup[2].nb_procs-1],
+                    tup[1].ptime,
+                    tup[1].ptime + tup[2].ptime                    
+                )
+                push!(jobass, joba)
+
+
                 # in this case, we need to change the start_time and the load of this one machine
                 machine_load[starting_machine_s0].load       += tup[2].ptime
                 machine_load[starting_machine_s0].start_time += tup[2].ptime                
@@ -435,8 +459,17 @@ function MRT(n::Int64, m::Int64, p::Array{Float64})
         starting_machine_s1 = starting_machine_s0
         println("starting_machine_s1: $starting_machine_s1")
         for i in 1:length(a_set_1)
-            allot = Allotment(a_set_1[i].task_id, 0.0, a_set_1[i].ptime, starting_machine_s1, a_set_1[i].nb_procs)
-            push!(schedule, allot)
+
+            #allot = Allotment(a_set_1[i].task_id, 0.0, a_set_1[i].ptime, starting_machine_s1, a_set_1[i].nb_procs)
+            #push!(schedule, allot)
+
+            joba = JobAssignment( jobs[a_set_1[i].task_id],  
+                M[starting_machine_s1:starting_machine_s1+a_set_1[i].nb_procs-1],
+                0.0,
+                a_set_1[i].ptime
+            )
+            push!(jobass, joba)
+                
 
             for j in 1:(a_set_1[i].nb_procs)
                 machine_load[starting_machine_s1+j-1].load       += a_set_1[i].ptime
@@ -449,8 +482,16 @@ function MRT(n::Int64, m::Int64, p::Array{Float64})
         starting_machine_s2 = starting_machine_s0
         println("starting_machine_s2: $starting_machine_s2")
         for i in 1:length(a_set_2)
-            allot = Allotment(a_set_2[i].task_id, 3/2*sol_d-a_set_2[i].ptime, a_set_2[i].ptime, starting_machine_s2, a_set_2[i].nb_procs)
-            push!(schedule, allot)
+            
+            #allot = Allotment(a_set_2[i].task_id, 3/2*sol_d-a_set_2[i].ptime, a_set_2[i].ptime, starting_machine_s2, a_set_2[i].nb_procs)
+            #push!(schedule, allot)
+
+            joba = JobAssignment( jobs[a_set_2[i].task_id],
+                M[starting_machine_s2:starting_machine_s2+a_set_2[i].nb_procs-1],
+                3/2*sol_d-a_set_2[i].ptime,
+                3/2*sol_d
+            )
+            push!(jobass, joba)            
             
             for j in 1:(a_set_2[i].nb_procs)
                 println("add set 2 load to mach ", starting_machine_s2+j-1)
@@ -465,17 +506,30 @@ function MRT(n::Int64, m::Int64, p::Array{Float64})
         # for each small task find machine with lowest load and map it there
         for i in 1:length(sol_set_small)
             task_id = sol_set_small[i]
-            ptime   = p[task_id, 1]
+            ptime   = jobs[task_id].params.p[1]
             min_load = mapreduce(x->x.load, min, machine_load)
             mach_idx = findfirst(x->x.load == min_load, machine_load)
             println("min load has machine $(mach_idx)")
-            allot = Allotment(task_id, machine_load[mach_idx].start_time, ptime, mach_idx, 1)
-            push!(schedule, allot)
+            
+            #allot = Allotment(task_id, machine_load[mach_idx].start_time, ptime, mach_idx, 1)            
+            #push!(schedule, allot)
+
+            joba = JobAssignment( jobs[task_id],
+                M[mach_idx:mach_idx],
+                # start_time is from the beginning, load is also for the ones at the end
+                machine_load[mach_idx].start_time,
+                machine_load[mach_idx].start_time + ptime
+            )
+            push!(jobass, joba)    
+            println("add small jobassignment: ", joba)        
+
+
             machine_load[mach_idx].load       += ptime
             machine_load[mach_idx].start_time += ptime
         end
         
     end
     
-    3/2*sol_d, schedule
+    #3/2*sol_d, schedule
+    Schedule(jobs, M, jobass)
 end

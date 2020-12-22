@@ -1,4 +1,5 @@
-export Job, Jobs, JobParams, ClassicalJobParams
+export Job, Jobs, JobParams
+export ClassicalJobParams, ParallelJobParams
 
 abstract type JobParams end
 
@@ -25,8 +26,8 @@ end
 ######################
 
 struct ParallelJobParams <: JobParams
-    p::Array{Float64,1}     # processing times        
-    function ParallelJobParams(;p=[1.0])
+    p::Array{Float64}     # processing times        
+    function ParallelJobParams(p)
         return new(p)
     end
 end

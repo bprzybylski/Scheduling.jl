@@ -11,5 +11,5 @@ function cmax(S::Schedule)
     if length(S.assignments) == 0
         return 0
     end
-    return maximum(A->A.C, S.assignments)
+    return maximum(A->A.P.C, S.assignments)
 end

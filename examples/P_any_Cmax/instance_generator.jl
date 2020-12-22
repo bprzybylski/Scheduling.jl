@@ -7,7 +7,8 @@
 #
 
 function gen_instance_prasanna_musicus(n, m) 
-    p = Array{Float64}(undef, n, m)
+    #p = Array{Float64}(undef, n, m)
+    jobs = Array{Job}(undef, n)
     
     # split into big and small tasks
     #n_large = Int64(ceil(n * 1/2))
@@ -16,19 +17,23 @@ function gen_instance_prasanna_musicus(n, m)
     n_small = n - n_large
 
     for i in 1:n_large
+        p = Array{Float64}(undef, m)
         alpha = 0.8 + (0.2)rand()
-        p[i,1] = rand(100:120)
+        p[1] = rand(100:120)
         for j in 2:m
-            p[i,j] = p[i,1] / (j^alpha)
+            p[j] = p[1] / (j^alpha)
         end
+        jobs[i] = Job(string(i), ParallelJobParams(p))
     end
     
     for i in (n_large+1):n
+        p = Array{Float64}(undef, m)
         alpha = rand()
-        p[i,1] = rand(2:6)
+        p[1] = rand(2:6)
         for j in 2:m
-            p[i,j] = p[i,1] / (j^alpha)
+            p[j] = p[1] / (j^alpha)
         end
+        jobs[i] = Job(string(i), ParallelJobParams(p))
     end
-    p
+    jobs
 end
