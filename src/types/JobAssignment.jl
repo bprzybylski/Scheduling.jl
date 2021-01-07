@@ -8,7 +8,7 @@ struct ClassicalJobAssignmentProperties <: JobAssignmentProperties
     M::Machine
     S::Rational{UInt}     # starting time
     C::Rational{UInt}     # completion time
-    function ClassicalJobParams(M, S, C)
+    function ClassicalJobAssignmentProperties(M, S, C)
         return new(M, S, C)
     end
 end
@@ -26,13 +26,25 @@ end
 mutable struct JobAssignment
     J::Job
     P::JobAssignmentProperties
-    function JobAssignment(J::Job, M::Machine, S::Rational{UInt}, C::Rational{UInt})
+    function JobAssignment(J::Job, M::Machine, S::Int, C::Int)
+        if S >= C
+            error("The execution time must be positive.")
+        end        
+        return new(J, ClassicalJobAssignmentProperties(M, S, C))
+    end
+    function JobAssignment(J::Job, M::Machine, S::Rational{Int}, C::Rational{Int})
+        if S >= C
+            error("The execution time must be positive.")
+        end
         return new(J, ClassicalJobAssignmentProperties(M, S, C))
     end
     # function JobAssignment(J::Job, P::ClassicalJobAssignmentProperties)
     #     return new(J, P)
     # end
     function JobAssignment(J::Job, M::Vector{Machine}, S::Float64, C::Float64)
+        if S >= C
+            error("The execution time must be positive.")
+        end
         return new(J, ParallelJobAssignmentProperties(M,S,C))
     end
 end

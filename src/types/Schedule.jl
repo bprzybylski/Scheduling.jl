@@ -139,7 +139,7 @@ function plot(S::Schedule; animate = false, sizex = 800, sizey = 500, output_fil
     for A in S.assignments
         x = float(A.P.S)
 
-        if  typeof(A.P) == ClassicalJobParams
+        if  typeof(A.P) == ClassicalJobAssignmentProperties
             y = findfirst(x->x==A.P.M, S.machines) - 1
             w = float(A.P.C-A.P.S)
             h = 1
