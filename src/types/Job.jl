@@ -26,7 +26,7 @@ end
 ######################
 
 struct ParallelJobParams <: JobParams
-    p::Array{Float64}     # processing times        
+    p::Array{Real}     # processing times        
     function ParallelJobParams(p)
         return new(p)
     end
@@ -83,7 +83,7 @@ function Base.show(io::IO, J::Job)
     else
         print(io, "Job ")
         printstyled(io, "$(J.name)"; bold = true, color = :light_blue)
-        print(io, "[$(typeof(J.params))]")
+        print(io, "$(J.params)")
     end
 end
 
@@ -93,6 +93,12 @@ function Base.show(io::IO, ::MIME"text/plain", S::Vector{Job})
         print(io, "\n\t")
         show(io, J)
     end
+end
+
+function Base.show(io::IO, pa::ParallelJobParams)
+    print(" ( p: [ ")
+    print(join(map(x -> pa.p[x], 1:length(pa.p)), ","))
+    print(" ])")
 end
 
 ##############

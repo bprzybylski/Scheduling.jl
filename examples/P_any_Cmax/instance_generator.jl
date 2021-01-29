@@ -1,3 +1,5 @@
+using Scheduling
+
 # 
 # par task model by Prasanna and Musicus, p(i) = p(1) / i^alpha
 #

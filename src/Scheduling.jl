@@ -17,11 +17,12 @@ end
 
 module Algorithms
 include("algorithms/list.jl")
-include("algorithms/1__Csum/wspt.jl")
 include("algorithms/P__Cmax/IP.jl")
 include("algorithms/P__Cmax/MR.jl")
 include("algorithms/P__Cmax/HS.jl")
 include("algorithms/P_any_Cmax/MRT.jl")
+include("algorithms/P_any_Cmax/DL.jl")
+include("algorithms/P_any_Cmax/TWY.jl")
 end
 
 end # module

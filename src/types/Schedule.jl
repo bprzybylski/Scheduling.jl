@@ -144,18 +144,20 @@ function plot(S::Schedule; animate = false, sizex = 800, sizey = 500, output_fil
             w = float(A.P.C-A.P.S)
             h = 1
         else
+            # these are the parallel jobs
             # there must be at least one machine
-            println(A.J)
-            println(A.P)
+            #println(A.J)
+            #println(A.P)
+
             nmach = length(A.P.M)
             first_mach = A.P.M[1]
             last_mach = last(A.P.M)
-            println(first_mach.name * " : " * last_mach.name)
+            #println(first_mach.name * " : " * last_mach.name)
 
             y = findfirst(x->x==first_mach, S.machines) - 1
             w = float(A.P.C-A.P.S)
             h = findfirst(x->x==last_mach, S.machines) - findfirst(x->x==first_mach, S.machines) + 1
-            println(y, " ", w, " ", h)
+            #println(y, " ", w, " ", h)
         end
 
         Plots.plot!(rectangle(w, h, x, y))

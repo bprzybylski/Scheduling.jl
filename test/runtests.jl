@@ -266,3 +266,6 @@ end
             @test wtsum(S3) == 0
       end
 end
+
+include("./algorithms/1__Csum/wspt_test.jl")
+
