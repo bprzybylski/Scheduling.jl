@@ -6,9 +6,10 @@ using Scheduling, Scheduling.Algorithms, Scheduling.Objectives
 
 Random.seed!(5)
 
-n = 25
+#n = 25
 #m = 10 
-m = 15
+n = 10
+m = 10
 jobs = gen_instance_prasanna_musicus(n, m) 
 machines = Machines(m)
 

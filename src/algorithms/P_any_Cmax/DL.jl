@@ -8,7 +8,8 @@
 
 mutable struct DL_cell
     val::Real
-    # for each job, we store whether it is seq (0) or par (1)
+    # for each job, we store whether it is par (1), 
+    # seq on mach 1 (2), or seq on mach 2 (3)
     job_config::Tuple{Int64,Int8}
 end
 

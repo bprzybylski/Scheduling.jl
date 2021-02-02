@@ -11,6 +11,10 @@ function SW1(J::Array{Job}, M::Vector{Machine}; eps = 1//10)::Schedule
         return Schedule()
     end
 
+    # algorithm is (1+3eps)OPT approx
+    # thus divide by three to get the desired precision
+    eps /= 3
+
     makespan = 0.0 
     bestsched = [0.0, 0.0]
     

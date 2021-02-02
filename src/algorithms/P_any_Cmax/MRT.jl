@@ -272,7 +272,10 @@ function MRT(jobs::Array{Job}, M::Vector{Machine})::Schedule
         
         println("set_small: $(set_small)")
         #Ws = sum(p[set_small,1])
-        Ws = mapreduce(x -> x.params.p[1], +, jobs[set_small])
+        Ws = 0
+        if length(set_small) > 0
+            Ws = mapreduce(x -> x.params.p[1], +, jobs[set_small])
+        end
         println("Ws: $(Ws)")
         
         #p_t = p[set_t,:]
