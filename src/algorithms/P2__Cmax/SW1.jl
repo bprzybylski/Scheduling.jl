@@ -4,6 +4,8 @@
 
 # Copright (c) 2021, sahu
 
+using Logging
+
 function SW1(J::Array{Job}, M::Vector{Machine}; eps = 1//10)::Schedule
 
     if length(M) != 2
@@ -25,9 +27,9 @@ function SW1(J::Array{Job}, M::Vector{Machine}; eps = 1//10)::Schedule
     
     bound = eps * L
     
-    print("\nepsilon=$(eps)\n")
-    print("L=$(L)\n")
-    print("bound=$(bound)\n")
+    @info "epsilon=$(eps)"
+    @info "L=$(L)"
+    @info "bound=$(bound)"
     
     idx_small = findall( x -> x.params.p <= bound, J )
     #app_psmall = p[idx_small]
@@ -35,29 +37,29 @@ function SW1(J::Array{Job}, M::Vector{Machine}; eps = 1//10)::Schedule
     idx_large = findall( x -> x.params.p > bound, J )
     #app_plarge = sum(map(x -> x.params.p, J[idx_large]))
     
-    print("n large: $(length(idx_large))\n")
-    print("n small: $(length(idx_small))\n")
+    @info "n large: $(length(idx_large))\n"
+    @info "n small: $(length(idx_small))\n"
     
     S = 0
     if length(idx_small) > 0
         S = sum(map(x -> x.params.p, J[idx_small]))
     end
 
-    print("S=$(S)\n")
-    print("S/(eps*L)=$(S/(eps*L))\n")
+    @info "S=$(S)"
+    @info "S/(eps*L)=$(S/(eps*L))"
     nchunks = floor(Int64, S/(eps*L))
-    print("⌊S/(eps*L)⌋=$(nchunks)\n")
+    @info "⌊S/(eps*L)⌋=$(nchunks)"
     
     ntasks = length(idx_large) + nchunks
-    print("n tasks in simplified instance: $(ntasks)\n")
+    @info "n tasks in simplified instance: $(ntasks)"
     
     sum_large = 0
     if length(idx_large) > 0
         sum_large = sum(map(x -> x.params.p, J[idx_large]))
     end
     app_psum = sum_large + nchunks * bound
-    print("total ptime in I : $(psum)\n")
-    print("total ptime in I#: $(app_psum)\n")
+    @info "total ptime in I : $(psum)"
+    @info "total ptime in I#: $(app_psum)"
         
     # create a simplified instance
     # create a copy of the large tasks
@@ -72,12 +74,12 @@ function SW1(J::Array{Job}, M::Vector{Machine}; eps = 1//10)::Schedule
     end
 
     #simp_instance = vcat(app_plarge, fill(bound, nchunks))
-    println("simplified instance: $(Jsim)")
+    @debug "simplified instance: $(Jsim)"
     
     sched = Algorithms.P__Cmax_IP(Jsim, M)
 
     #solution = solve_p_cmax(simp_instance, length(simp_instance), 2)
-    println("solution=$(sched)")
+    @debug "solution=$(sched)"
     
     # translate it back
     # lets get the large tasks first
@@ -109,7 +111,7 @@ function SW1(J::Array{Job}, M::Vector{Machine}; eps = 1//10)::Schedule
     stack_m1 = 0.0
     # fill small jobs up to this bound on machine 1
     filled_m1 = false
-    println("bound_m1: $(bound_m1)")
+    @debug "bound_m1: $(bound_m1)"
     
     for i in 1:length(idx_small)
         if filled_m1 == false

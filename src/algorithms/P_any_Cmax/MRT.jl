@@ -345,7 +345,7 @@ function MRT(jobs::Array{Job}, M::Vector{Machine})::Schedule
                 W = 0.0
                 for i in 1:n_t
                     task_id = set_t[i]
-                    if findfirst(x -> x==task_id, tasks_set_s1) != nothing
+                    if findfirst(x -> x==task_id, tasks_set_s1) !== nothing
                         W += can_work_d[i]
                     else
                         W += can_work_d2[i]                

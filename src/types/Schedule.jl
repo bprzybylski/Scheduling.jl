@@ -46,6 +46,14 @@ function TeX(S::Schedule, output_file::String = "Schedule.tex"; compile = false)
                                                minimum width=#2*\\ux,
                                                node contents=#1,
                                                inner sep=0pt}}
+                \\tikzset{x=\\ux,
+                          y=\\uy,
+                          burstp/.style n args={3}{draw,
+                                                anchor=south west,
+                                                minimum height=-#2*\\uy,
+                                                minimum width=#3*\\ux,
+                                                node contents=#1,
+                                                inner sep=0pt}}
                 """)
 
         # Find the number of machines
@@ -53,7 +61,7 @@ function TeX(S::Schedule, output_file::String = "Schedule.tex"; compile = false)
         # Find the length of a schedule
         cmax = 0
         if length(S.assignments) > 0
-            cmax = maximum(A->A.C, S.assignments)
+            cmax = maximum(A->A.P.C, S.assignments)
         end
 
         write(f, "% Processors", "\n")
@@ -65,7 +73,16 @@ function TeX(S::Schedule, output_file::String = "Schedule.tex"; compile = false)
 
         write(f, "% Jobs", "\n")
         for A in S.assignments
-            write(f, "\\path ($(float(A.S))-.015,$(findfirst(x->x==A.M, S.machines))) node[burst={\$$(A.J.name)\$}{$(float(A.C-A.S))}, fill=white];", " % $A", "\n")
+
+            if  typeof(A.P) == ClassicalJobAssignmentProperties
+                write(f, "\\path ($(float(A.P.S))-.015,$(findfirst(x->x==A.P.M, S.machines))) node[burst={\$$(A.J.name)\$}{$(float(A.P.C-A.P.S))}, fill=white];", " % $A", "\n")
+            else
+                nmach = length(A.P.M)
+                first_mach = A.P.M[1]
+                last_mach = last(A.P.M)
+                write(f, "\\path ($(float(A.P.S))-.015,$(findfirst(x->x==last_mach, S.machines))) node[burstp={\$$(A.J.name)\$}{$(nmach)}{$(float(A.P.C-A.P.S))}, fill=white];", " % $A", "\n")
+            end
+    
         end
 
         write(f, """% Draw the horizontal axis
@@ -119,8 +136,9 @@ function plot(S::Schedule; animate = false, sizex = 800, sizey = 500, output_fil
     rectangle(w::Float64, h::Int64, x::Float64, y::Int64) =
         Plots.Shape(x .+ [0,w,w,0], y .+ [0,0,h,h])
 
-    Plots.theme(:juno)
-    Plots.pyplot(size = (sizex, sizey), legend = false)
+    #Plots.theme(:juno)
+    Plots.theme(:default)
+    Plots.pyplot(size = (sizex, sizey), legend = false, dpi=300)
     Plots.plot(xlims = (0, cmax),
                ylims = (0, m),
                yflip = true,

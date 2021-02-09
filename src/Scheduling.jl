@@ -7,6 +7,12 @@ include("types/Schedule.jl")
 
 include("types/MachineLoad.jl")
 
+# module SchedulingOptimizer
+# include("helper/optimizer_selector.jl")
+# include("helper/model_glpk.jl")
+# #include("helper/model_gurobi.jl")
+# end
+
 module Objectives
 include("objectives/cmax.jl")
 include("objectives/csum.jl")
