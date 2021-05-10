@@ -74,13 +74,13 @@ function TeX(S::Schedule, output_file::String = "Schedule.tex"; compile = false)
         write(f, "% Jobs", "\n")
         for A in S.assignments
 
-            if  typeof(A.P) == ClassicalJobAssignmentProperties
+            if typeof(A.P) == ClassicalJobAssignmentProperties
                 write(f, "\\path ($(float(A.P.S))-.015,$(findfirst(x->x==A.P.M, S.machines))) node[burst={\$$(A.J.name)\$}{$(float(A.P.C-A.P.S))}, fill=white];", " % $A", "\n")
-            else
-                nmach = length(A.P.M)
-                first_mach = A.P.M[1]
-                last_mach = last(A.P.M)
-                write(f, "\\path ($(float(A.P.S))-.015,$(findfirst(x->x==last_mach, S.machines))) node[burstp={\$$(A.J.name)\$}{$(nmach)}{$(float(A.P.C-A.P.S))}, fill=white];", " % $A", "\n")
+            elseif typeof(A.P) == ParallelJobAssignmentProperties
+                machines = length(A.P.M)
+                first_machine = A.P.M[1]
+                last_machine = last(A.P.M)
+                write(f, "\\path ($(float(A.P.S))-.015,$(findfirst(x->x == last_machine, S.machines))) node[burstp={\$$(A.J.name)\$}{$(machines)}{$(float(A.P.C-A.P.S))}, fill=white];", " % $A", "\n")
             end
     
         end
@@ -157,24 +157,24 @@ function plot(S::Schedule; animate = false, sizex = 800, sizey = 500, output_fil
     for A in S.assignments
         x = float(A.P.S)
 
-        if  typeof(A.P) == ClassicalJobAssignmentProperties
+        if typeof(A.P) == ClassicalJobAssignmentProperties
             y = findfirst(x->x==A.P.M, S.machines) - 1
             w = float(A.P.C-A.P.S)
             h = 1
-        else
-            # these are the parallel jobs
-            # there must be at least one machine
-            #println(A.J)
-            #println(A.P)
+        elseif typeof(A.P) == ParallelJobAssignmentProperties
+            # Caution. This function assumes that the machines are consecutive and that they are
+            # listed in the increasing order.
 
-            nmach = length(A.P.M)
-            first_mach = A.P.M[1]
-            last_mach = last(A.P.M)
-            #println(first_mach.name * " : " * last_mach.name)
+            # TODO. Non-consecutive machines.
 
-            y = findfirst(x->x==first_mach, S.machines) - 1
-            w = float(A.P.C-A.P.S)
-            h = findfirst(x->x==last_mach, S.machines) - findfirst(x->x==first_mach, S.machines) + 1
+            machines = length(A.P.M)
+            first_machine = A.P.M[1]
+            last_machine = last(A.P.M)
+            # println(first_mach.name * " : " * last_mach.name)
+
+            y = findfirst(x->x == first_machine, S.machines) - 1
+            w = float(A.P.C - A.P.S)
+            h = findfirst(x->x == last_machine, S.machines) - findfirst(x->x == first_machine, S.machines) + 1
             #println(y, " ", w, " ", h)
         end
 
