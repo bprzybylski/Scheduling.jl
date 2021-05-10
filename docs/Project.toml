@@ -4,4 +4,4 @@ Scheduling = "3046eef8-5348-48c9-b840-6c15f76662f3"
 
 [compat]
 Documenter = "^0.23.0"
-Scheduling = "^0.1.0"
+Scheduling = "^0.2.0"
