@@ -24,6 +24,7 @@ makedocs(
          "algorithms_list.md",
          "algorithms_P__Cmax.md"
          "algorithms_P2__Cmax.md"
+         "algorithms_P_any_Cmax.md"
       ],
       "examples.md"
    ]
