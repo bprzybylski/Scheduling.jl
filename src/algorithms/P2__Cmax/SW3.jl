@@ -1,28 +1,30 @@
-
-# Schuurman, P., & Woeginger, G. J. (2001). 
-# Approximation schemes-a tutorial. Lectures on Scheduling.
-
-# 3rd alg for P2||Cmax (this is an FPTAS)
-# Copright (c) 2021, sahu
-
 using Logging
 
-mutable struct SW3_cell
-    # current load of machine
+mutable struct P2__Cmax_SW3_cell
+    # Current load of machine
     load::Real 
-    # remember job ids on each machine
+    # Remember job ids on each machine
     job_id::Vector{Int64}
 end
 
+"""
+    P2__Cmax_SW3(J::Vector{Job}, M::Vector{Machine}; eps = 1//10)
 
-function SW3(J::Array{Job}, M::Vector{Machine}; eps = 1//10)::Schedule
+This is an FPTAS algorithm for the P2||Cmax problem.
+
+# References
+* Schuurman, P., & Woeginger, G. J. (2001), Approximation schemes-a tutorial. Lectures on Scheduling.
+"""
+function P2__Cmax_SW3(J::Array{Job}, M::Vector{Machine}; eps = 1//10)
+    J = Base.copy(J)
+    M = Base.copy(M)
 
     if length(M) != 2
-        # return empty schedule
+        # Return an empty schedule
         return Schedule()
     end
 
-    if length(J) <= 0
+    if length(J) <= 0J
         return Schedule()
     end
 
@@ -36,18 +38,18 @@ function SW3(J::Array{Job}, M::Vector{Machine}; eps = 1//10)::Schedule
     @info "delta=$(delta)"
     
     VS = [ [ 
-        [ SW3_cell( 0, []  ), SW3_cell( J[1].params.p[1], [1]  ) ],
-        [ SW3_cell( J[1].params.p[1], [1]  ),  SW3_cell( 0, []  ) ]
+        [ P2__Cmax_SW3_cell( 0, []  ), P2__Cmax_SW3_cell( J[1].params.p[1], [1]  ) ],
+        [ P2__Cmax_SW3_cell( J[1].params.p[1], [1]  ),  P2__Cmax_SW3_cell( 0, []  ) ]
         ] ]
     
-    # create L^2 cells
+    # Create L^2 cells
     L = floor(Int, log(psum)/log(delta))
     @info "L=$(L)"
     
     for k=2:n
         #println("round $(k)")
         cells = falses(L,L)
-        newvs = Array{SW3_cell,1}[]
+        newvs = Array{P2__Cmax_SW3_cell,1}[]
         oldvs = VS[k-1]
 
         for i in 1:length(oldvs)

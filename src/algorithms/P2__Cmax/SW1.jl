@@ -1,20 +1,23 @@
-
-# Schuurman, P., & Woeginger, G. J. (2001). 
-# Approximation schemes-a tutorial. Lectures on Scheduling.
-
-# Copright (c) 2021, sahu
-
 using Logging
 
-function SW1(J::Array{Job}, M::Vector{Machine}; eps = 1//10)::Schedule
+"""
+    P2__Cmax_SW1(J::Vector{Job}, M::Vector{Machine}; eps = 1//10)
+
+This is a (1 + eps)-approximation algorithm for the P2||Cmax problem.
+
+# References
+* Schuurman, P., & Woeginger, G. J. (2001), Approximation schemes-a tutorial. Lectures on Scheduling.
+"""
+function P2__Cmax_SW1(J::Vector{Job}, M::Vector{Machine}; eps = 1//10)
+    J = Base.copy(J)
+    M = Base.copy(M)
 
     if length(M) != 2
-        # return empty schedule
+        # Return an empty schedule
         return Schedule()
     end
 
-    # algorithm is (1+3eps)OPT approx
-    # thus divide by three to get the desired precision
+    # The algorithm is (1 + 3eps)-approximation, so divide by three to get the desired precision
     eps /= 3
 
     makespan = 0.0 
@@ -61,13 +64,13 @@ function SW1(J::Array{Job}, M::Vector{Machine}; eps = 1//10)::Schedule
     @info "total ptime in I : $(psum)"
     @info "total ptime in I#: $(app_psum)"
         
-    # create a simplified instance
-    # create a copy of the large tasks
+    # Create a simplified instance
+    # Create a copy of the large tasks
     Jsim = Job[]
     for i=1:length(idx_large)
         push!(Jsim, deepcopy(J[idx_large[i]]))
     end
-    # create dummy tasks
+    # Create dummy tasks
     for i=1:nchunks
         dj = Job("dummy" * string(i), ClassicalJobParams(p=bound))
         push!(Jsim, dj)
@@ -81,8 +84,8 @@ function SW1(J::Array{Job}, M::Vector{Machine}; eps = 1//10)::Schedule
     #solution = solve_p_cmax(simp_instance, length(simp_instance), 2)
     @debug "solution=$(sched)"
     
-    # translate it back
-    # lets get the large tasks first
+    # Translate it back
+    # Lets get the large tasks first
     approx_jobass = JobAssignment[]
     mach_times = [0, 0]
     s1 = 0.0   # total sum of small jobs on machine 1
@@ -109,7 +112,7 @@ function SW1(J::Array{Job}, M::Vector{Machine}; eps = 1//10)::Schedule
     
     bound_m1 = s1 + 2*eps*L
     stack_m1 = 0.0
-    # fill small jobs up to this bound on machine 1
+    # Fill small jobs up to this bound on machine 1
     filled_m1 = false
     @debug "bound_m1: $(bound_m1)"
     

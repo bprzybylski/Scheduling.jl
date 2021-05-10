@@ -1,6 +1,6 @@
 using JuMP, GLPK
 
-using Gurobi
+# using Gurobi
 
 """
     P__Cmax_IP!(J::Vector{Job}, M::Vector{Machine}; optimizer = GLPK.Optimizer)
@@ -20,9 +20,9 @@ function P__Cmax_IP!(J::Vector{Job}, M::Vector{Machine}; optimizer = GLPK.Optimi
 
     # Set up the model
     #model = Scheduling.SchedulingOptimizer.get_model()
-    #model = Model(optimizer)
-    model = Model(Gurobi.Optimizer)
-    set_optimizer_attribute(model, "OutputFlag", 0)
+    model = Model(optimizer)
+    #model = Model(Gurobi.Optimizer)
+    #set_optimizer_attribute(model, "OutputFlag", 0)
 
     # Get the number of jobs
     n = length(P)

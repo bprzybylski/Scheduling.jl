@@ -23,6 +23,7 @@ makedocs(
       "Algorithms" => [
          "algorithms_list.md",
          "algorithms_P__Cmax.md"
+         "algorithms_P2__Cmax.md"
       ],
       "examples.md"
    ]
