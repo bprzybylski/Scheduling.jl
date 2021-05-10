@@ -4,7 +4,16 @@ using Scheduling, Scheduling.Objectives
 # “Approximate Algorithms Scheduling Parallelizable Tasks”. 
 # In: SPAA. ACM, 1992, pp. 323–332. DOI: 10.1145/140901.141909.
 
-function TWY(J::Array{Job}, M::Vector{Machine})::Schedule    
+"""
+    P_any_Cmax_TWY(J::Array{Job}, M::Vector{Machine})
+
+# References
+* J. Turek, J. L. Wolf, and P. S. Yu. Approximate Algorithms Scheduling Parallelizable Tasks. In: SPAA. ACM, 1992, pp. 323–332. DOI: 10.1145/140901.141909.
+"""
+function P_any_Cmax_TWY(J::Array{Job}, M::Vector{Machine})
+    J = Base.copy(J)
+    M = Base.copy(M)
+
     best_schedule = nothing
     best_makespan = typemax(Int64)
 
@@ -25,7 +34,6 @@ function TWY(J::Array{Job}, M::Vector{Machine})::Schedule
 
     best_schedule
 end
-
 
 #
 # GF algorithm
@@ -78,8 +86,6 @@ function gf(J::Array{Job}, M::Vector{Machine})
     #println(allotments)
     allotments        
 end
-
-
 
 # LTF-C algorithm
 
@@ -142,7 +148,6 @@ function ltf_c(J::Array{Job}, M::Vector{Machine}, allot::Vector{Int64})
             push!(jobass, jass)
         end
     end
-        
         
     Schedule(J, M, jobass)
 end

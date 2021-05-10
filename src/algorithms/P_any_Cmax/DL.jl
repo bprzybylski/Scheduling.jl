@@ -1,14 +1,4 @@
-
-# Du, J., & Leung, J. (1989). 
-# Complexity of scheduling parallel task systems. 
-# SIAM Journal on Discrete Mathematics, 2(4), 473–487. 
-# http://doi.org/10.1137/0402042
-
-# P2|any|Cmax
-
-# Copright (c) 2021, sahu 
-
-mutable struct DL_cell
+mutable struct P2_any_Cmax_DL_cell
     val::Real
     # for each job, we store whether it is par (1), 
     # seq on mach 1 (2), or seq on mach 2 (3)
@@ -16,7 +6,17 @@ mutable struct DL_cell
 end
 
 
-function DL(J::Array{Job}, M::Vector{Machine})::Schedule
+"""
+    P2_any_Cmax_DL(J::Array{Job}, M::Vector{Machine})
+
+This is an exact pseudopolynomial algorithm for the P2|any|Cmax problem.
+
+# References
+* Du, J., & Leung, J. (1989). Complexity of scheduling parallel task systems. SIAM Journal on Discrete Mathematics, 2(4), 473–487. http://doi.org/10.1137/0402042
+"""
+function P2_any_Cmax_DL(J::Array{Job}, M::Vector{Machine})
+    J = Base.copy(J)
+    M = Base.copy(M)
 
     n = length(J)
     m = length(M)
@@ -28,9 +28,9 @@ function DL(J::Array{Job}, M::Vector{Machine})::Schedule
     # sum up seq running times (upper bound)
     T = Int64(sum(x -> J[x].params.p[1], 1:n))
 
-    F = Array{DL_cell}(undef, n + 1, T + 1, T + 1)
+    F = Array{P2_any_Cmax_DL_cell}(undef, n + 1, T + 1, T + 1)
 
-    F[1,1,1] = DL_cell(0, (-1,0))
+    F[1,1,1] = P2_any_Cmax_DL_cell(0, (-1,0))
 
     # cmax will not be larger then T
     INFTY = 2*T
@@ -38,7 +38,7 @@ function DL(J::Array{Job}, M::Vector{Machine})::Schedule
     for x1 = 0:T
         for x2 = 0:T        
             if 0 < x1 + x2 && x1 + x2 <= T
-                F[1,1 + x1,1 + x2] = DL_cell(INFTY, (-1,0))
+                F[1,1 + x1,1 + x2] = P2_any_Cmax_DL_cell(INFTY, (-1,0))
             end
         end
     end
@@ -67,7 +67,7 @@ function DL(J::Array{Job}, M::Vector{Machine})::Schedule
                     val   = min(val1, val2, val3)
                     jstate = argmin([ val1, val2, val3 ])
 
-                    F[j,1 + x1,1 + x2] = DL_cell(val, (j-1, jstate))
+                    F[j,1 + x1,1 + x2] = P2_any_Cmax_DL_cell(val, (j-1, jstate))
                 end
             end
         end

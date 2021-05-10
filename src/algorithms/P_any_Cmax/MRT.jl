@@ -1,10 +1,4 @@
-# Mounié, G., Rapine, C., & Trystram, D. (2007). 
-# A $\frac32$‐Approximation Algorithm for Scheduling Independent Monotonic Malleable Tasks. 
-# SIAM Journal on Computing, 37(2), 401–412. 
-# http://doi.org/10.1137/S0097539701385995
-
-using JuMP
-using GLPK
+using JuMP, GLPK
 
 struct Allotment
     task_id::Int64
@@ -58,7 +52,6 @@ function get_upper_bound(n::Int64, m::Int64, jobs::Array{Job})
 end
 
 function solve_knapsack(n::Int64, m::Int64, jobs::Array{Job}, d::Float64, can_nb_d::Array{Int64}, can_nb_d2::Array{Int64}, can_work_d::Array{Float64}, can_work_d2::Array{Float64})
-    
     mod = Model(GLPK.Optimizer)
     #set_optimizer_attribute(mod, "OutputFlag", 0)
     
@@ -242,15 +235,31 @@ function is_feasible(m::Int64, d::Float64, a_set_0::Array{Tuple{MRTAllotment,MRT
     feasible
 end
 
-function MRT(jobs::Array{Job}, M::Vector{Machine})::Schedule
+# Mounié, G., Rapine, C., & Trystram, D. (2007). 
+# A $\frac32$‐Approximation Algorithm for Scheduling Independent Monotonic Malleable Tasks. 
+# SIAM Journal on Computing, 37(2), 401–412. 
+# http://doi.org/10.1137/S0097539701385995
+
+"""
+    P_any_Cmax_MRT(J::Array{Job}, M::Vector{Machine})
+
+This is a 3/2-approximation algorithm for the P|any|Cmax problem.
+
+# References
+* Mounié, G., Rapine, C., & Trystram, D. (2007). A 3/2‐Approximation Algorithm for Scheduling Independent Monotonic Malleable Tasks. SIAM Journal on Computing, 37(2), 401–412. http://doi.org/10.1137/S0097539701385995
+"""
+function P_any_Cmax_MRT(J::Array{Job}, M::Vector{Machine})
+    J = Base.copy(J)
+    M = Base.copy(M)
+
     #schedule = Array{Allotment,1}()
     makespan = 0.0
 
-    n::Int64 = length(jobs)
+    n::Int64 = length(J)
     m::Int64 = length(M)
     
-    upper_bound = get_upper_bound(n, m, jobs)
-    lower_bound = get_lower_bound(n, m, jobs)
+    upper_bound = get_upper_bound(n, m, J)
+    lower_bound = get_lower_bound(n, m, J)
     println("bounds $(lower_bound) $(upper_bound)")
 
     
@@ -265,21 +274,21 @@ function MRT(jobs::Array{Job}, M::Vector{Machine})::Schedule
         println("current d: $(d)")
 
         # these are all tasks smaller than d/2 with p[1]
-        set_small = findall( x -> x.params.p[1] <= d/2, jobs )
+        set_small = findall( x -> x.params.p[1] <= d/2, J )
         # these are all tasks larger than d/2 with p[1]
-        set_t = findall( x -> x.params.p[1] > d/2, jobs )
+        set_t = findall( x -> x.params.p[1] > d/2, J )
         println("set_t: $(set_t)")
         
         println("set_small: $(set_small)")
         #Ws = sum(p[set_small,1])
         Ws = 0
         if length(set_small) > 0
-            Ws = mapreduce(x -> x.params.p[1], +, jobs[set_small])
+            Ws = mapreduce(x -> x.params.p[1], +, J[set_small])
         end
         println("Ws: $(Ws)")
         
         #p_t = p[set_t,:]
-        p_t = jobs[set_t]
+        p_t = J[set_t]
         println("p_t: $(p_t)")
         n_t = length(set_t)
         
@@ -380,12 +389,12 @@ function MRT(jobs::Array{Job}, M::Vector{Machine})::Schedule
         
         # fill sets S1 (bound d) and S2 (bound d/2)
         for i in 1:length(sol_set_1)
-            nb_procs, ptime = get_canonical_nb_procs_and_ptime(jobs[sol_set_1[i]], m, sol_d)
+            nb_procs, ptime = get_canonical_nb_procs_and_ptime(J[sol_set_1[i]], m, sol_d)
             allot = MRTAllotment(sol_set_1[i], nb_procs, ptime)
             push!(a_set_1, allot)
         end
         for i in 1:length(sol_set_2)
-            nb_procs, ptime = get_canonical_nb_procs_and_ptime(jobs[sol_set_2[i]], m, sol_d/2)
+            nb_procs, ptime = get_canonical_nb_procs_and_ptime(J[sol_set_2[i]], m, sol_d/2)
             allot = MRTAllotment(sol_set_2[i], nb_procs, ptime)
             push!(a_set_2, allot)
         end
@@ -399,9 +408,9 @@ function MRT(jobs::Array{Job}, M::Vector{Machine})::Schedule
             
             @warn "schedule infeasible"
             
-            transformed, a_set_0, a_set_1, a_set_2 = try_reducing_procs_of_tasks_in_s1(m, sol_d, a_set_0, a_set_1, a_set_2, jobs)
+            transformed, a_set_0, a_set_1, a_set_2 = try_reducing_procs_of_tasks_in_s1(m, sol_d, a_set_0, a_set_1, a_set_2, J)
             transformed, a_set_0, a_set_1, a_set_2 = try_stacking_tasks_from_s1(m, sol_d, a_set_0, a_set_1, a_set_2)
-            transformed, a_set_0, a_set_1, a_set_2 = try_moving_tasks_from_s2_to_s1(m, sol_d, a_set_0, a_set_1, a_set_2, jobs)
+            transformed, a_set_0, a_set_1, a_set_2 = try_moving_tasks_from_s2_to_s1(m, sol_d, a_set_0, a_set_1, a_set_2, J)
                 
             # this is only for debugging purposes            
             test_cnt += 1
@@ -427,7 +436,7 @@ function MRT(jobs::Array{Job}, M::Vector{Machine})::Schedule
             #allot = Allotment(tup[1].task_id, 0.0, tup[1].ptime, starting_machine_s0, tup[1].nb_procs)
             #push!(schedule, allot)
 
-            joba = JobAssignment( jobs[tup[1].task_id],  
+            joba = JobAssignment( J[tup[1].task_id],  
                 M[starting_machine_s0:starting_machine_s0+tup[1].nb_procs-1],
                 0.0,
                 tup[1].ptime                    
@@ -444,7 +453,7 @@ function MRT(jobs::Array{Job}, M::Vector{Machine})::Schedule
                 #allot = Allotment(tup[2].task_id, tup[1].ptime, tup[2].ptime, starting_machine_s0, tup[2].nb_procs)
                 #push!(schedule, allot)
                 
-                joba = JobAssignment( jobs[tup[2].task_id],  
+                joba = JobAssignment( J[tup[2].task_id],  
                     M[starting_machine_s0:starting_machine_s0+tup[2].nb_procs-1],
                     tup[1].ptime,
                     tup[1].ptime + tup[2].ptime                    
@@ -466,7 +475,7 @@ function MRT(jobs::Array{Job}, M::Vector{Machine})::Schedule
             #allot = Allotment(a_set_1[i].task_id, 0.0, a_set_1[i].ptime, starting_machine_s1, a_set_1[i].nb_procs)
             #push!(schedule, allot)
 
-            joba = JobAssignment( jobs[a_set_1[i].task_id],  
+            joba = JobAssignment( J[a_set_1[i].task_id],  
                 M[starting_machine_s1:starting_machine_s1+a_set_1[i].nb_procs-1],
                 0.0,
                 a_set_1[i].ptime
@@ -489,7 +498,7 @@ function MRT(jobs::Array{Job}, M::Vector{Machine})::Schedule
             #allot = Allotment(a_set_2[i].task_id, 3/2*sol_d-a_set_2[i].ptime, a_set_2[i].ptime, starting_machine_s2, a_set_2[i].nb_procs)
             #push!(schedule, allot)
 
-            joba = JobAssignment( jobs[a_set_2[i].task_id],
+            joba = JobAssignment( J[a_set_2[i].task_id],
                 M[starting_machine_s2:starting_machine_s2+a_set_2[i].nb_procs-1],
                 3/2*sol_d-a_set_2[i].ptime,
                 3/2*sol_d
@@ -509,7 +518,7 @@ function MRT(jobs::Array{Job}, M::Vector{Machine})::Schedule
         # for each small task find machine with lowest load and map it there
         for i in 1:length(sol_set_small)
             task_id = sol_set_small[i]
-            ptime   = jobs[task_id].params.p[1]
+            ptime   = J[task_id].params.p[1]
             min_load = mapreduce(x->x.load, min, machine_load)
             mach_idx = findfirst(x->x.load == min_load, machine_load)
             println("min load has machine $(mach_idx)")
@@ -517,7 +526,7 @@ function MRT(jobs::Array{Job}, M::Vector{Machine})::Schedule
             #allot = Allotment(task_id, machine_load[mach_idx].start_time, ptime, mach_idx, 1)            
             #push!(schedule, allot)
 
-            joba = JobAssignment( jobs[task_id],
+            joba = JobAssignment( J[task_id],
                 M[mach_idx:mach_idx],
                 # start_time is from the beginning, load is also for the ones at the end
                 machine_load[mach_idx].start_time,
@@ -534,5 +543,5 @@ function MRT(jobs::Array{Job}, M::Vector{Machine})::Schedule
     end
     
     #3/2*sol_d, schedule
-    Schedule(jobs, M, jobass)
+    Schedule(J, M, jobass)
 end

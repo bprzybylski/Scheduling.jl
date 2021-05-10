@@ -50,9 +50,11 @@ struct ParallelJobParams <: JobParams
 end
 ```
 
+The `p` vector contains the actual processing times of the job provided that a given number of machines is used. For example, if `p = [100, 80, 60, 20, 10]`, then it would take ten units of time to execute this job on five machines in parallel, but 60 units if the job was executed on three machines in parallel.
+
 ```julia-repl
-julia> Job("J", ParallelJobParams([10]))
-Parallel job J:  (p : [10])
+julia> Job("J", ParallelJobParams([10,5]))
+Parallel job J:  (p : [10,5])
 ```
 
 ## Creating a set of jobs
