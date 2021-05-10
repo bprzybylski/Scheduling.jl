@@ -236,14 +236,14 @@ function is_feasible(m::Int64, d::Float64, a_set_0::Array{Tuple{MRTAllotment,MRT
 end
 
 """
-    P_any_Cmax_MRT(J::Array{Job}, M::Vector{Machine})
+    P_any_Cmax_MRT(J::Vector{Job}, M::Vector{Machine})
 
 This is a 3/2-approximation algorithm for the P|any|Cmax problem.
 
 # References
 * Mounié, G., Rapine, C., & Trystram, D. (2007). A 3/2‐Approximation Algorithm for Scheduling Independent Monotonic Malleable Tasks. SIAM Journal on Computing, 37(2), 401–412. http://doi.org/10.1137/S0097539701385995
 """
-function P_any_Cmax_MRT(J::Array{Job}, M::Vector{Machine})
+function P_any_Cmax_MRT(J::Vector{Job}, M::Vector{Machine})
     J = Base.copy(J)
     M = Base.copy(M)
 

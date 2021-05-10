@@ -7,14 +7,14 @@ end
 
 
 """
-    P2_any_Cmax_DL(J::Array{Job}, M::Vector{Machine})
+    P2_any_Cmax_DL(J::Vector{Job}, M::Vector{Machine})
 
 This is an exact pseudopolynomial algorithm for the P2|any|Cmax problem.
 
 # References
 * Du, J., & Leung, J. (1989). Complexity of scheduling parallel task systems. SIAM Journal on Discrete Mathematics, 2(4), 473–487. http://doi.org/10.1137/0402042
 """
-function P2_any_Cmax_DL(J::Array{Job}, M::Vector{Machine})
+function P2_any_Cmax_DL(J::Vector{Job}, M::Vector{Machine})
     J = Base.copy(J)
     M = Base.copy(M)
 

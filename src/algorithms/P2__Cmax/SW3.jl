@@ -15,7 +15,7 @@ This is an FPTAS algorithm for the P2||Cmax problem.
 # References
 * Schuurman, P., & Woeginger, G. J. (2001), Approximation schemes-a tutorial. Lectures on Scheduling.
 """
-function P2__Cmax_SW3(J::Array{Job}, M::Vector{Machine}; eps = 1//10)
+function P2__Cmax_SW3(J::Vector{Job}, M::Vector{Machine}; eps = 1//10)
     J = Base.copy(J)
     M = Base.copy(M)
 

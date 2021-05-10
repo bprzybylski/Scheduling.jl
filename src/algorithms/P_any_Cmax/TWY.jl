@@ -5,12 +5,12 @@ using Scheduling, Scheduling.Objectives
 # In: SPAA. ACM, 1992, pp. 323–332. DOI: 10.1145/140901.141909.
 
 """
-    P_any_Cmax_TWY(J::Array{Job}, M::Vector{Machine})
+    P_any_Cmax_TWY(J::Vector{Job}, M::Vector{Machine})
 
 # References
 * J. Turek, J. L. Wolf, and P. S. Yu. Approximate Algorithms Scheduling Parallelizable Tasks. In: SPAA. ACM, 1992, pp. 323–332. DOI: 10.1145/140901.141909.
 """
-function P_any_Cmax_TWY(J::Array{Job}, M::Vector{Machine})
+function P_any_Cmax_TWY(J::Vector{Job}, M::Vector{Machine})
     J = Base.copy(J)
     M = Base.copy(M)
 
