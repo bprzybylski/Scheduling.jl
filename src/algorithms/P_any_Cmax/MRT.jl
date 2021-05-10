@@ -235,11 +235,6 @@ function is_feasible(m::Int64, d::Float64, a_set_0::Array{Tuple{MRTAllotment,MRT
     feasible
 end
 
-# Mounié, G., Rapine, C., & Trystram, D. (2007). 
-# A $\frac32$‐Approximation Algorithm for Scheduling Independent Monotonic Malleable Tasks. 
-# SIAM Journal on Computing, 37(2), 401–412. 
-# http://doi.org/10.1137/S0097539701385995
-
 """
     P_any_Cmax_MRT(J::Array{Job}, M::Vector{Machine})
 
