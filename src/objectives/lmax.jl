@@ -15,5 +15,5 @@ function lmax(S::Schedule)
     # the maximum lateness of this job is the lateness
     # of its last part. Thus, the maximum lateness in
     # a schedule is the maximum lateness from all assignments.
-    return maximum(A->(Rational{Int}(A.C) - A.J.params.d), S.assignments)
+    return maximum(A->(Rational{Int}(A.P.C) - A.J.params.d), S.assignments)
 end

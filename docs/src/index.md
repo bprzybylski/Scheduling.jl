@@ -25,11 +25,7 @@ The `Scheduling.Objectives` module provides a number of objective functions that
 
 This module provides a set of implementations of the scheduling algorithms. These algorithms may be used to transform a set of jobs and machines into a schedule based on exact, heuristic or approximation approach. The list of algorithms include the standard list algorithms like LPT, SPT, WLPT and WSPT.
 
-Moreover a few algorithms for the $\text{P}||\text{C}_\text{max}$ problem are implemented:
-
-* an exact algorithm based on the Integer Program,
-* an approximation algorithm by Hochbaum & Shmoys,
-* an on-line MR algorithm for the same problem by Fleischer & Wahl.
+Moreover, we implemented a few exact and approximation algorithms for the $\text{P}||\text{C}_\text{max}$ and $\text{P}|\text{any}|\text{C}_\text{max}$ problems.
 
 ## Installation
 

@@ -8,7 +8,7 @@ In order to create a job, you may use the `Job` constructor. Is is required to p
 
 ```julia-repl
 julia> Job("J")
-Job J:  [p = 1]
+Classical job J:        [p = 1]
 ```
 
 As you can see, the default processing time of a job is equal to 1. Of course, job parameters can be set when the job is created. However, as `Job` is an immutable struct, you are not able to change any of the parameters of an existing job. The structure of the `Job` struct is as follows:
@@ -36,7 +36,25 @@ It is forbidden to create a job for which `r + p > D`.
 
 ```julia-repl
 julia> Job("J", ClassicalJobParams(p = 13//2, r = 7//3, d = -3//7))
-Job J:  [p = 13//2, r = 7//3, d = -3//7]
+Classical job J:        [p = 13//2, r = 7//3, d = -3//7]
+```
+
+However, the package also supports parallel jobs. In case you want to define a parallel job, use the following struct.
+
+```julia
+struct ParallelJobParams <: JobParams
+    p::Vector{Real}       # processing times        
+    function ParallelJobParams(p)
+        return new(p)
+    end
+end
+```
+
+The `p` vector contains the actual processing times of the job provided that a given number of machines is used. For example, if `p = [100, 80, 60, 20, 10]`, then it would take ten units of time to execute this job on five machines in parallel, but 60 units if the job was executed on three machines in parallel.
+
+```julia-repl
+julia> Job("J", ParallelJobParams([10,5]))
+Parallel job J:  (p : [10,5])
 ```
 
 ## Creating a set of jobs
@@ -58,6 +76,6 @@ A set of 0 job(s):
 
 julia> push!(J, Job("J"))
 A set of 1 job(s):
-    Job J:  [p = 1]
+        Classical job J:        [p = 1]
 
 ```

@@ -1,4 +1,5 @@
-export Job, Jobs, JobParams, ClassicalJobParams
+export Job, Jobs, JobParams
+export ClassicalJobParams, ParallelJobParams
 
 abstract type JobParams end
 
@@ -20,6 +21,17 @@ struct ClassicalJobParams <: JobParams
     end
 end
 
+#####################
+# ParallelJobParams #
+#####################
+
+struct ParallelJobParams <: JobParams
+    p::Vector{Real}       # processing times        
+    function ParallelJobParams(p)
+        return new(p)
+    end
+end
+
 #######
 # Job #
 #######
@@ -27,6 +39,12 @@ end
 struct Job
     name::String
     params::JobParams
+    function Job(name::String, params::ParallelJobParams)
+        return new(name, params)
+    end
+    function Job(name::String, params::ClassicalJobParams)
+        return new(name, params)
+    end
     function Job(name::String, params = ClassicalJobParams())
         return new(name, params)
     end
@@ -34,41 +52,12 @@ end
 
 function Base.show(io::IO, J::Job)
     if typeof(J.params) == ClassicalJobParams
-        function rtos(r::Rational)
-            if r == Inf
-                return "∞"
-            elseif denominator(r) == 1
-                return string(numerator(r))
-            end
-            return string(numerator(r), "//", denominator(r))
-        end
-
-        print(io, "Job ")
-        printstyled(io, "$(J.name):\t"; bold = true, color = :light_blue)
-        print(io, "[p = ")
-        printstyled(io, "$(rtos(J.params.p))"; bold = true, color = :light_cyan)
-        if J.params.w != 1
-            print(io, ", w = ")
-            printstyled(io, "$(rtos(J.params.w))"; bold = true, color = :magenta)
-        end
-        if J.params.r != 0
-            print(io, ", r = ")
-            printstyled(io, "$(rtos(J.params.r))"; bold = true, color = :light_black)
-        end
-        if J.params.d != Inf
-            print(io, ", d = ")
-            printstyled(io, "$(rtos(J.params.d))"; bold = true, color = :light_black)
-        end
-        if J.params.D != Inf
-            print(io, ", D = ")
-            printstyled(io, "$(rtos(J.params.D))"; bold = true, color = :light_black)
-        end
-        print(io, "]")
+        print(io, "Classical job ")
     else
-        print(io, "Job ")
-        printstyled(io, "$(J.name)"; bold = true, color = :light_blue)
-        print(io, "[$(typeof(J.params))]")
+        print(io, "Parallel job ")
     end
+    printstyled(io, "$(J.name):\t"; bold = true, color = :light_blue)
+    print(io, "$(J.params)")
 end
 
 function Base.show(io::IO, ::MIME"text/plain", S::Vector{Job})
@@ -77,6 +66,43 @@ function Base.show(io::IO, ::MIME"text/plain", S::Vector{Job})
         print(io, "\n\t")
         show(io, J)
     end
+end
+
+function Base.show(io::IO, pa::ClassicalJobParams)
+    function rtos(r::Rational)
+        if r == Inf
+            return "∞"
+        elseif denominator(r) == 1
+            return string(numerator(r))
+        end
+        return string(numerator(r), "//", denominator(r))
+    end
+
+    print(io, "[p = ")
+    printstyled(io, "$(rtos(pa.p))"; bold = true, color = :light_cyan)
+    if pa.w != 1
+        print(io, ", w = ")
+        printstyled(io, "$(rtos(pa.w))"; bold = true, color = :magenta)
+    end
+    if pa.r != 0
+        print(io, ", r = ")
+        printstyled(io, "$(rtos(pa.r))"; bold = true, color = :light_black)
+    end
+    if pa.d != Inf
+        print(io, ", d = ")
+        printstyled(io, "$(rtos(pa.d))"; bold = true, color = :light_black)
+    end
+    if pa.D != Inf
+        print(io, ", D = ")
+        printstyled(io, "$(rtos(pa.D))"; bold = true, color = :light_black)
+    end
+    print(io, "]")
+end
+
+function Base.show(io::IO, pa::ParallelJobParams)
+    print(" (p : [")
+    print(join(map(x -> pa.p[x], 1:length(pa.p)), ", "))
+    print("])")
 end
 
 ##############

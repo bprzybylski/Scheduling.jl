@@ -1,3 +1,5 @@
+export P__Cmax_HS, P__Cmax_HS!
+
 mutable struct P__Cmax_HS_BinConfig
     load::Rational{Int}
     assignments::Array{Int}
@@ -250,7 +252,7 @@ function P__Cmax_HS!(J::Vector{Job}, M::Vector{Machine}; eps = 1//10, verbose = 
         end
     end
 
-    if best_bin_packing != nothing
+    if best_bin_packing !== nothing
         # For every bin in a solution (a machine)
         for i in 1:length(best_bin_packing)
             load = Rational{Int}(0)

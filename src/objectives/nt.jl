@@ -11,7 +11,7 @@ function nt(S::Schedule; weighted = false)
     T = []
     for J in S.jobs
         X = filter(A -> A.J === J, S.assignments)
-        if length(X) > 0 && (maximum(A -> A.C, X) > J.params.d)
+        if length(X) > 0 && (maximum(A -> A.P.C, X) > J.params.d)
             push!(T, (weighted ? J.params.w : 1))
         end
     end

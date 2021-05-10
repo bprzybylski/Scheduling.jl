@@ -46,6 +46,14 @@ function TeX(S::Schedule, output_file::String = "Schedule.tex"; compile = false)
                                                minimum width=#2*\\ux,
                                                node contents=#1,
                                                inner sep=0pt}}
+                \\tikzset{x=\\ux,
+                          y=\\uy,
+                          burstp/.style n args={3}{draw,
+                                                anchor=south west,
+                                                minimum height=-#2*\\uy,
+                                                minimum width=#3*\\ux,
+                                                node contents=#1,
+                                                inner sep=0pt}}
                 """)
 
         # Find the number of machines
@@ -53,7 +61,7 @@ function TeX(S::Schedule, output_file::String = "Schedule.tex"; compile = false)
         # Find the length of a schedule
         cmax = 0
         if length(S.assignments) > 0
-            cmax = maximum(A->A.C, S.assignments)
+            cmax = maximum(A->A.P.C, S.assignments)
         end
 
         write(f, "% Processors", "\n")
@@ -65,7 +73,16 @@ function TeX(S::Schedule, output_file::String = "Schedule.tex"; compile = false)
 
         write(f, "% Jobs", "\n")
         for A in S.assignments
-            write(f, "\\path ($(float(A.S))-.015,$(findfirst(x->x==A.M, S.machines))) node[burst={\$$(A.J.name)\$}{$(float(A.C-A.S))}, fill=white];", " % $A", "\n")
+
+            if typeof(A.P) == ClassicalJobAssignmentProperties
+                write(f, "\\path ($(float(A.P.S))-.015,$(findfirst(x->x==A.P.M, S.machines))) node[burst={\$$(A.J.name)\$}{$(float(A.P.C-A.P.S))}, fill=white];", " % $A", "\n")
+            elseif typeof(A.P) == ParallelJobAssignmentProperties
+                machines = length(A.P.M)
+                first_machine = A.P.M[1]
+                last_machine = last(A.P.M)
+                write(f, "\\path ($(float(A.P.S))-.015,$(findfirst(x->x == last_machine, S.machines))) node[burstp={\$$(A.J.name)\$}{$(machines)}{$(float(A.P.C-A.P.S))}, fill=white];", " % $A", "\n")
+            end
+    
         end
 
         write(f, """% Draw the horizontal axis
@@ -113,14 +130,15 @@ function plot(S::Schedule; animate = false, sizex = 800, sizey = 500, output_fil
     # Find the length of a schedule
     cmax = 0
     if length(S.assignments) > 0
-        cmax = maximum(A->A.C, S.assignments)
+        cmax = maximum(A->A.P.C, S.assignments)
     end
 
     rectangle(w::Float64, h::Int64, x::Float64, y::Int64) =
         Plots.Shape(x .+ [0,w,w,0], y .+ [0,0,h,h])
 
-    Plots.theme(:juno)
-    Plots.pyplot(size = (sizex, sizey), legend = false)
+    #Plots.theme(:juno)
+    Plots.theme(:default)
+    Plots.pyplot(size = (sizex, sizey), legend = false, dpi=300)
     Plots.plot(xlims = (0, cmax),
                ylims = (0, m),
                yflip = true,
@@ -137,19 +155,38 @@ function plot(S::Schedule; animate = false, sizex = 800, sizey = 500, output_fil
     end
 
     for A in S.assignments
-        x = float(A.S)
-        y = findfirst(x->x==A.M, S.machines) - 1
-        w = float(A.C-A.S)
-        h = 1
+        x = float(A.P.S)
+
+        if typeof(A.P) == ClassicalJobAssignmentProperties
+            y = findfirst(x->x==A.P.M, S.machines) - 1
+            w = float(A.P.C-A.P.S)
+            h = 1
+        elseif typeof(A.P) == ParallelJobAssignmentProperties
+            # Caution. This function assumes that the machines are consecutive and that they are
+            # listed in the increasing order.
+
+            # TODO. Non-consecutive machines.
+
+            machines = length(A.P.M)
+            first_machine = A.P.M[1]
+            last_machine = last(A.P.M)
+            # println(first_mach.name * " : " * last_mach.name)
+
+            y = findfirst(x->x == first_machine, S.machines) - 1
+            w = float(A.P.C - A.P.S)
+            h = findfirst(x->x == last_machine, S.machines) - findfirst(x->x == first_machine, S.machines) + 1
+            #println(y, " ", w, " ", h)
+        end
 
         Plots.plot!(rectangle(w, h, x, y))
         Plots.annotate!([(x+w/2, y+h/2,
-                         Plots.text(A.J.name, :center, 14, "Courier New"))])
+                        Plots.text(A.J.name, :center, 14, "Courier New"))])
 
         if animate
             Plots.frame(anim)
         end
     end
+
 
     if animate
         Plots.gif(anim, output_file, fps = fps)

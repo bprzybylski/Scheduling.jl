@@ -134,17 +134,17 @@ using Scheduling, Scheduling.Objectives, Test
         A = JobAssignment(J, M, 1, 5)
         @test typeof(A) == JobAssignment &&
               A.J === J &&
-              A.M === M &&
-              A.S == 1 &&
-              A.C == 5
+              A.P.M === M &&
+              A.P.S == 1 &&
+              A.P.C == 5
 
         # Test a general constructor for rationals
         A = JobAssignment(J, M, 1//2, 5//3)
         @test typeof(A) == JobAssignment &&
               A.J === J &&
-              A.M === M &&
-              A.S == 1//2 &&
-              A.C == 5//3
+              A.P.M === M &&
+              A.P.S == 1//2 &&
+              A.P.C == 5//3
 
         # The following tests whether an exception is thrown if C < S
         @test_throws Exception JobAssignment(J, M, 2, 1)
@@ -266,3 +266,4 @@ end
             @test wtsum(S3) == 0
       end
 end
+

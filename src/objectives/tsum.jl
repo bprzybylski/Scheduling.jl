@@ -12,7 +12,7 @@ function tsum(S::Schedule; weighted = false)
     for J in S.jobs
         X = filter(A -> A.J === J, S.assignments)
         if length(X) > 0
-            push!(T, max(maximum(A -> Rational{Int}(A.C), X) - J.params.d, 0)*(weighted ? J.params.w : 1))
+            push!(T, max(maximum(A -> Rational{Int}(A.P.C), X) - J.params.d, 0)*(weighted ? J.params.w : 1))
         end
     end
     if length(T) == 0

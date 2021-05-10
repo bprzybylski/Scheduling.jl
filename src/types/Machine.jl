@@ -39,9 +39,9 @@ function Base.show(io::IO, M::Machine)
         print(io, "Machine ")
         printstyled(io, "$(M.name)"; bold = true, color = :light_yellow)
         if M.params.s != 1
-            print(io, ":\t [s = ")
+            print(io, ":\t (s = ")
             printstyled(io, "$(rtos(M.params.s))"; bold = true, color = :magenta)
-            print(io, "]")
+            print(io, ")")
         end
     else
         print(io, "Machine ")

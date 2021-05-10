@@ -46,6 +46,10 @@ Scheduling.plot(S::Schedule;
 Scheduling.TeX(S::Schedule, output_file::String = "Schedule.tex"; compile = false)
 ```
 
+!!! note
+
+    If you generate a schedule for parallel jobs, then keep in mind that at the moment the `plot` function assumes that the machines are consecutive and that they are listed in the increasing order.
+
 ## Saving/loading a schedule
 
 A `Schedule` structure can be easily saved to a file and then loaded back. The `Scheduling` package uses the HDF5 binary files to store structures.
