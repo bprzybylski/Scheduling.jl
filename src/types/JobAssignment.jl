@@ -1,8 +1,8 @@
 export JobAssignment, JobAssignments
-#export ClassicalJobAssignmentProperties, ParallelJobAssignmentProperties
 
-abstract type JobAssignmentProperties 
-end
+# export ClassicalJobAssignmentProperties, ParallelJobAssignmentProperties
+
+abstract type JobAssignmentProperties end
 
 struct ClassicalJobAssignmentProperties <: JobAssignmentProperties
     M::Machine
@@ -15,15 +15,12 @@ end
 
 struct ParallelJobAssignmentProperties <: JobAssignmentProperties
     M::Vector{Machine}
-    # S::Float64     # starting time
-    # C::Float64     # completion time
-    S                # starting time
-    C                # completion time
+    S::Float64        # starting time
+    C::Float64        # completion time
     function ParallelJobAssignmentProperties(M, S, C)
         return new(M, S, C)
     end
 end
-
 
 mutable struct JobAssignment
     J::Job
@@ -38,7 +35,7 @@ mutable struct JobAssignment
         if S >= C
             error("The execution time must be positive.")
         end
-        return new(J, ParallelJobAssignmentProperties(M,S,C))
+        return new(J, ParallelJobAssignmentProperties(M, S, C))
     end
 end
 
