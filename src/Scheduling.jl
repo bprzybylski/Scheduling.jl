@@ -31,6 +31,7 @@ include("algorithms/P2__Cmax/SW3.jl")
 include("algorithms/P_any_Cmax/MRT.jl")
 include("algorithms/P_any_Cmax/DL.jl")
 include("algorithms/P_any_Cmax/TWY.jl")
+include("algorithms/P__pjp__intree__Cmax/Hus_algorithm.jl")
 end
 
 end # module
