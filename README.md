@@ -7,6 +7,11 @@
 
 `Scheduling.jl` is a pure Julia package that can be seen as a framework for scheduling research. It is maintained by Sascha Hunold (TU Wien) and Bartlomiej Przybylski (AMU Poznan).
 
+## Contributors
+
+- Daniel Cano Robledo (Hu's algorithm)
+- Rupert Ettrich (Hu's algorithm)
+
 ## Features
 
 At the moment the package provides a limited amount of functionalities.
