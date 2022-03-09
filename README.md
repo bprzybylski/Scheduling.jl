@@ -11,6 +11,8 @@
 
 - Daniel Cano Robledo (Hu's algorithm)
 - Rupert Ettrich (Hu's algorithm)
+- Jan Hadl (Gonzales & Sahni algorithm for Q|prmp|Cmax)
+- Christoph Priesner (Gonzales & Sahni algorithm for Q|prmp|Cmax)
 
 ## Features
 
