@@ -1,7 +1,7 @@
 name = "Scheduling"
 uuid = "3046eef8-5348-48c9-b840-6c15f76662f3"
 authors = ["Bartek Przybylski <bap@amu.edu.pl>", "Sascha Hunold <sascha@hunoldscience.net>"]
-version = "0.2.1"
+version = "0.2.2"
 
 [deps]
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
@@ -18,10 +18,7 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
-DataStructures = "~0.17.0"
-GLPK = "~0.12.0"
-JLD2 = "~0.1.12"
-JuMP = "~0.21.0"
-Plots = "~1.24.0"
-PyPlot = "~2.10.0"
+JuMP = "^1.10.0"
+Plots = "^1.0.0"
+PyPlot = "^2.0.0"
 julia = "^1.5.0"

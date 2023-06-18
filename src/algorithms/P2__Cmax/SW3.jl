@@ -24,7 +24,7 @@ function P2__Cmax_SW3(J::Vector{Job}, M::Vector{Machine}; eps = 1//10)
         return Schedule()
     end
 
-    if length(J) <= 0J
+    if length(J) <= 0
         return Schedule()
     end
 
