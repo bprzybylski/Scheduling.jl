@@ -26,7 +26,7 @@ println(jobs_int)
 
 machines = Machines(m)
 
-sched = Algorithms.DL(jobs_int, machines)
+sched = Algorithms.P2_any_Cmax_DL(jobs_int, machines)
 
 println("\n-------")
 println("m=$(m)")

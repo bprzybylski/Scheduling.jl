@@ -13,7 +13,7 @@ m = 10
 jobs = gen_instance_prasanna_musicus(n, m) 
 machines = Machines(m)
 
-sched = Algorithms.MRT(jobs, machines)
+sched = Algorithms.P_any_Cmax_MRT(jobs, machines)
 
 println("\n-------")
 println("m=$(m)")
